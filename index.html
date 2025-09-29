@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGA Prompt Generator Assistant</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #131a2e; /* Deep Desaturated Navy/Purple */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e2947; /* Card background color */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568; /* Scrollbar thumb */
+            border-radius: 4px;
+        }
+        .card {
+            background-color: #1e2947; /* Rich dark blue for main card */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5); /* Increased shadow depth */
+        }
+        input[type="text"], select, textarea {
+            background-color: #131a2e; /* Match body background for input fields */
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        .required-star:after {
+            content: "*";
+            color: #f87171;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
+
+    <div id="app-container" class="w-full max-w-4xl">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-white mb-2">Prompt Generator Assistant (PGA)</h1>
+            <p class="text-gray-400">Structured prompt creation for generative AI.</p>
+        </header>
+
+        <!-- Main Card Container -->
+        <div class="card p-6 rounded-xl">
+            <!-- Step 1: Output Goal -->
+            <div id="step1" class="text-center">
+                <h2 class="text-xl font-semibold text-white mb-4">Step 1: Determine the Output Goal</h2>
+                <p class="text-gray-300 mb-6">Is this prompt for a static image/illustration, or for a scene involving motion (e.g., a video or an animated sequence with specific character actions)?</p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button onclick="setGoal('Image')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200">
+                        Static Image/Illustration
+                    </button>
+                    <button onclick="setGoal('Scene/Video')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200">
+                        Scene/Video (Motion)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Selection Options -->
+            <div id="step2" class="hidden">
+                <h2 class="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3">Step 2: Define Parameters (<span id="goal-display" class="font-bold text-lg"></span>)</h2>
+                <div id="form-container" class="space-y-6">
+
+                    <!-- 1. Subject -->
+                    <div id="field-subject">
+                        <label for="subject-input" class="block text-sm font-medium text-gray-300 required-star">1. Subject/Character(s)</label>
+                        <p class="text-xs text-gray-500 mb-1">Choose the main subject(s). Be descriptive.</p>
+                        <select id="subject-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Character —</option>
+                            <option value="A stoic, elderly fisherman">A stoic, elderly fisherman</option>
+                            <option value="Young woman of West African descent">Young woman of West African descent</option>
+                            <option value="Non-binary person with brightly colored hair">Non-binary person with brightly colored hair</option>
+                            <option value="Person in a futuristic uniform">Person in a futuristic uniform</option>
+                            <option value="A majestic mythological creature">A majestic mythological creature</option>
+                        </select>
+                        <input type="text" id="subject-input" placeholder="... or type your own subject here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 2. Action/State -->
+                    <div id="field-action">
+                        <label for="action-input" class="block text-sm font-medium text-gray-300 required-star">2. Action/State</label>
+                        <p class="text-xs text-gray-500 mb-1" id="action-note">What is the subject doing? (Required for Scene/Video)</p>
+                        <select id="action-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Action —</option>
+                            <option value="Running through a crowded street">Running through a crowded street</option>
+                            <option value="Gently turning their head to look over their shoulder">Gently turning their head to look over their shoulder</option>
+                            <option value="Sitting pensively by a window">Sitting pensively by a window</option>
+                            <option value="Standing on the edge of a precipice">Standing on the edge of a precipice</option>
+                            <option value="Floating peacefully in water">Floating peacefully in water</option>
+                        </select>
+                        <input type="text" id="action-input" placeholder="... or type your own action/state here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 3. Scenery/Context -->
+                    <div id="field-scenery">
+                        <label for="scenery-input" class="block text-sm font-medium text-gray-300 required-star">3. Scenery/Context</label>
+                        <p class="text-xs text-gray-500 mb-1">Where and when is the subject located?</p>
+                        <select id="scenery-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Scenery —</option>
+                            <option value="A futuristic neon-drenched cityscape at midnight">A futuristic neon-drenched cityscape at midnight</option>
+                            <option value="An ancient, overgrown temple ruin deep in a rainforest">An ancient, overgrown temple ruin deep in a rainforest</option>
+                            <option value="A cozy, wood-paneled library during a snowstorm">A cozy, wood-paneled library during a snowstorm</option>
+                            <option value="The vast, desolate landscape of a red desert planet">The vast, desolate landscape of a red desert planet</option>
+                            <option value="The deck of a sailing ship on a stormy sea">The deck of a sailing ship on a stormy sea</option>
+                        </select>
+                        <input type="text" id="scenery-input" placeholder="... or type your own scenery/context here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 4. Artistic Style/Medium + Style Mixer -->
+                    <div id="field-style">
+                        <label for="style-input" class="block text-sm font-medium text-gray-300 required-star">4. Artistic Style/Medium</label>
+                        <p class="text-xs text-gray-500 mb-1">What is the desired aesthetic (medium, style, or technique)?</p>
+                        <select id="style-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Style —</option>
+                            <option value="Concept Art">Concept Art</option>
+                            <option value="Oil Painting (Impressionist style)">Oil Painting (Impressionist style)</option>
+                            <option value="Cyberpunk Film Noir">Cyberpunk Film Noir</option>
+                            <option value="High-Detail CGI Render">High-Detail CGI Render</option>
+                            <option value="Ghibli-Inspired Anime">Ghibli-Inspired Anime</option>
+                            <option value="Pencil Sketch">Pencil Sketch</option>
+                            <option value="Digital Illustration (Hyper-realistic)">Digital Illustration (Hyper-realistic)</option>
+                        </select>
+                        <input type="text" id="style-input" placeholder="... or type a custom style (e.g., Watercolor, Claymation)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        
+                        <!-- New: Style Mixer -->
+                        <label for="style-mixer-input" class="block text-sm font-medium text-gray-400 mt-4">Style Mixer (Optional)</label>
+                        <p class="text-xs text-gray-500 mb-1">Add a secondary style or artist to blend with your primary selection (e.g., "Art Nouveau" or "by Gustave Doré").</p>
+                        <input type="text" id="style-mixer-input" placeholder="Type secondary style here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+                    
+                    <!-- 5. Camera Angle/Composition -->
+                    <div id="field-angle">
+                        <label for="angle-input" class="block text-sm font-medium text-gray-300">5. Camera Angle/Composition</label>
+                        <p class="text-xs text-gray-500 mb-1">How is the scene framed? (Highly Recommended)</p>
+                        <select id="angle-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Angle —</option>
+                            <option value="Wide Shot (showing the full environment)">Wide Shot</option>
+                            <option value="Close-Up (focusing on the face)">Close-Up</option>
+                            <option value="Dutch Angle (tilted for unease)">Dutch Angle</option>
+                            <option value="Low-Angle Shot (making the subject appear powerful)">Low-Angle Shot</option>
+                            <option value="Aerial View (top-down)">Aerial View</option>
+                            <option value="Tracking Shot (following the subject)">Tracking Shot</option>
+                        </select>
+                        <input type="text" id="angle-input" placeholder="... or type a custom angle (e.g., Medium Shot, POV)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 6. Lighting/Ambiance -->
+                    <div id="field-lighting">
+                        <label for="lighting-input" class="block text-sm font-medium text-gray-300 required-star">6. Lighting/Ambiance</label>
+                        <p class="text-xs text-gray-500 mb-1">How does the light look, and what is the overall mood of the light?</p>
+                        <select id="lighting-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Lighting —</option>
+                            <option value="Volumetric Lighting (dramatic light shafts)">Volumetric Lighting</option>
+                            <option value="Rim Lighting (bright outline on the subject)">Rim Lighting</option>
+                            <option value="Warm Golden Hour">Warm Golden Hour</option>
+                            <option value="Cool Blue Moonlight">Cool Blue Moonlight</option>
+                            <option value="Harsh Fluorescent Light">Harsh Fluorescent Light</option>
+                            <option value="Soft, Diffused Lighting">Soft, Diffused Lighting</option>
+                        </select>
+                        <input type="text" id="lighting-input" placeholder="... or type custom lighting (e.g., Studio Softbox Lighting)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 7. Mood/Atmosphere -->
+                    <div id="field-mood">
+                        <label for="mood-input" class="block text-sm font-medium text-gray-300 required-star">7. Mood/Atmosphere</label>
+                        <p class="text-xs text-gray-500 mb-1">What feeling should the final output evoke?</p>
+                        <select id="mood-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select a Suggested Mood —</option>
+                            <option value="Eerie and Suspenseful">Eerie and Suspenseful</option>
+                            <option value="Calm and Reflective">Calm and Reflective</option>
+                            <option value="Joyful and Energetic">Joyful and Energetic</option>
+                            <option value="Epic and Grandiose">Epic and Grandiose</option>
+                            <option value="Melancholic and Solemn">Melancholic and Solemn</option>
+                        </select>
+                        <input type="text" id="mood-input" placeholder="... or type a custom mood (e.g., Tense and Anxious)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 8. Aspect Ratio/Format -->
+                    <div id="field-aspect-ratio">
+                        <label for="aspect-ratio-input" class="block text-sm font-medium text-gray-300 required-star">8. Aspect Ratio/Format</label>
+                        <p class="text-xs text-gray-500 mb-1">Choose the final image shape (critical for generation).</p>
+                        <select id="aspect-ratio-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="" disabled selected>— Select Aspect Ratio —</option>
+                            <option value="aspect ratio 16:9 (Cinematic)">16:9 (Landscape/Video)</option>
+                            <option value="aspect ratio 1:1 (Square)">1:1 (Square/Social)</option>
+                            <option value="aspect ratio 4:3 (Classic)">4:3 (Standard Photo)</option>
+                            <option value="aspect ratio 9:16 (Vertical/Mobile)">9:16 (Portrait/Mobile)</option>
+                            <option value="aspect ratio 21:9 (Ultrawide)">21:9 (Ultrawide Cinema)</option>
+                        </select>
+                        <input type="text" id="aspect-ratio-input" placeholder="... or type a custom ratio (e.g., 5:4)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+                    
+                    <!-- 9. Camera Movement (New Field) -->
+                    <div id="field-camera-movement">
+                        <label for="camera-movement-input" class="block text-sm font-medium text-gray-300 required-star">9. Camera Movement (Cinematic Control)</label>
+                        <p class="text-xs text-gray-500 mb-1" id="camera-movement-note">Specify the camera's action. (Required for Scene/Video)</p>
+                        <select id="camera-movement-select" class="w-full mt-1 p-3 rounded-lg focus:ring-sky-500 focus:border-sky-500 text-sm">
+                            <option value="" disabled selected>— Select Camera Movement —</option>
+                            <option value="Dolly Zoom (Vertigo Effect)">Dolly Zoom (Vertigo Effect)</option>
+                            <option value="Smooth tracking shot, following the subject">Tracking Shot (Following the subject)</option>
+                            <option value="Orbit shot, circling the subject">Orbit Shot (Circling the subject)</option>
+                            <option value="Handheld shaky POV">Handheld POV (Shaky, immediate feel)</option>
+                            <option value="Static pan left/right">Pan Left/Right (Static pivot)</option>
+                        </select>
+                        <input type="text" id="camera-movement-input" placeholder="... or type a custom movement (e.g., Crane shot ascending)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+                    
+                    <!-- 10. Technical Modifiers (New Field) -->
+                    <div id="field-technical-modifiers">
+                        <label for="technical-modifiers-input" class="block text-sm font-medium text-gray-300">10. Technical Modifiers (Optional)</label>
+                        <p class="text-xs text-gray-500 mb-1">Add specific high-impact keywords for rendering and quality (e.g., ZBrush, Subsurface Scattering, UE5).</p>
+                        <input type="text" id="technical-modifiers-input" placeholder="e.g., Octane render, 16k, depth of field, tilt-shift lens" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+
+                    <div class="mt-8">
+                        <button onclick="generatePrompt()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                            Generate Final Prompt
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 3: Result Display -->
+            <div id="step3" class="hidden">
+                <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-3">Step 3: Final Generative Prompt</h2>
+                <div id="confirmation-list" class="mb-6 p-4 rounded-lg bg-gray-800 text-sm text-gray-300 space-y-2">
+                    <!-- Selections will be injected here -->
+                </div>
+                
+                <h3 class="text-lg font-medium text-indigo-400 mb-2">Synthesized Prompt:</h3>
+                <textarea id="final-prompt-output" rows="6" readonly class="w-full p-3 rounded-lg border-2 border-indigo-500 text-base text-white resize-none"></textarea>
+
+                <button onclick="copyToClipboard('final-prompt-output')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg mt-4 transition duration-200">
+                    Copy Prompt to Clipboard
+                </button>
+                <p id="copy-message" class="text-center mt-2 text-sm text-green-400 opacity-0 transition duration-300">Copied!</p>
+                
+                <hr class="my-6 border-gray-700">
+
+                <h3 class="text-xl font-medium text-emerald-400 mb-4">🚀 LLM Powered Refinements</h3>
+                
+                <!-- Prompt Enhancement Feature -->
+                <h4 class="text-lg font-medium text-emerald-300 mb-2">✨ 1. Enhance Positive Prompt Detail</h4>
+                <p class="text-sm text-gray-400 mb-3">Expand your synthesized prompt with cinematic detail, extra keywords, and advanced technical parameters.</p>
+                
+                <button onclick="refinePromptWithGemini()" id="refine-button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 focus:ring-4 focus:ring-emerald-500 focus:ring-opacity-50">
+                    ✨ Enhance Prompt Detail
+                </button>
+
+                <div id="refinement-area" class="mt-4 hidden">
+                    <div id="loading-indicator-refine" class="text-center text-indigo-400 p-4 hidden">
+                        <div class="animate-spin inline-block w-6 h-6 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full"></div>
+                        <p class="mt-2">Refining prompt with LLM...</p>
+                    </div>
+                    
+                    <h5 class="text-base font-medium text-white mb-2" id="refined-prompt-title">Enhanced Prompt:</h5>
+                    <textarea id="refined-prompt-output" rows="8" readonly class="w-full p-3 rounded-lg border-2 border-emerald-500 text-base text-white resize-none"></textarea>
+                    
+                    <button onclick="copyToClipboard('refined-prompt-output')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg mt-4 transition duration-200">
+                        Copy Enhanced Prompt
+                    </button>
+                    <!-- NEW: Confirmation message for Enhanced Prompt -->
+                    <p id="copy-message-enhanced" class="text-center mt-2 text-sm text-green-400 opacity-0 transition duration-300">Copied Enhanced Prompt!</p>
+                </div>
+
+                <hr class="my-6 border-gray-700">
+
+                <!-- Negative Prompt Feature -->
+                <h4 class="text-lg font-medium text-rose-300 mb-2">🚫 2. Generate Negative Prompt</h4>
+                <p class="text-sm text-gray-400 mb-3">Generate a list of exclusion keywords to prevent common errors, artifacts, and undesirable elements based on your style/mood.</p>
+                
+                <button onclick="generateNegativePromptWithGemini()" id="negative-button" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 focus:ring-4 focus:ring-rose-500 focus:ring-opacity-50">
+                    🚫 Generate Negative Prompt
+                </button>
+
+                <div id="negative-area" class="mt-4 hidden">
+                    <div id="loading-indicator-negative" class="text-center text-indigo-400 p-4 hidden">
+                        <div class="animate-spin inline-block w-6 h-6 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full"></div>
+                        <p class="mt-2">Generating negative keywords with LLM...</p>
+                    </div>
+                    
+                    <h5 class="text-base font-medium text-white mb-2">Negative Prompt:</h5>
+                    <textarea id="negative-prompt-output" rows="4" readonly class="w-full p-3 rounded-lg border-2 border-rose-500 text-base text-white resize-none"></textarea>
+                    
+                    <button onclick="copyToClipboard('negative-prompt-output')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg mt-4 transition duration-200">
+                        Copy Negative Prompt
+                    </button>
+                    <!-- NEW: Confirmation message for Negative Prompt -->
+                    <p id="copy-message-negative" class="text-center mt-2 text-sm text-green-400 opacity-0 transition duration-300">Copied Negative Prompt!</p>
+                </div>
+
+
+                <button onclick="resetApp()" class="w-full text-gray-400 hover:text-white mt-6 text-sm">
+                    Start Over
+                </button>
+            </div>
+        </div>
+        <!-- Simple Message Box for non-alert communication -->
+        <div id="message-box" class="fixed top-5 right-5 p-4 rounded-lg shadow-lg bg-red-800 text-white hidden z-50"></div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let promptData = {
+            outputGoal: null,
+            subject: null,
+            action: null,
+            scenery: null,
+            style: null,
+            styleMixer: null, // New
+            cameraAngle: null, 
+            cameraMovement: null, // New
+            lighting: null,
+            mood: null,
+            aspectRatio: null,
+            technicalModifiers: null // New
+        };
+
+        // --- Gemini API Setup ---
+        const apiKey = "AIzaSyCoTvY7laG7ON_FPa5Rs9ploLF_WI7dagI"; // <--- Key is set here
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
+        const MAX_RETRIES = 3;
+        const INITIAL_DELAY = 1000;
+
+        // --- Utility Functions ---
+        function showMessage(text, duration = 3000, isError = false) {
+            const box = document.getElementById('message-box');
+            box.textContent = text;
+            box.className = `fixed top-5 right-5 p-3 rounded-lg shadow-lg ${isError ? 'bg-red-600' : 'bg-green-600'} text-white z-50 block`;
+            setTimeout(() => {
+                box.classList.add('hidden');
+            }, duration);
+        }
+
+        function copyToClipboard(elementId) {
+            const copyText = document.getElementById(elementId);
+            const textToCopy = copyText.value;
+            
+            // 1. Determine prompt type and message element ID
+            let promptType = 'Prompt';
+            let msgId = 'copy-message'; 
+            
+            if (elementId.includes('negative')) {
+                promptType = 'Negative Prompt';
+                msgId = 'copy-message-negative';
+            } else if (elementId.includes('refined')) {
+                promptType = 'Enhanced Prompt';
+                msgId = 'copy-message-enhanced';
+            }
+
+            const msg = document.getElementById(msgId);
+
+            // 2. Attempt copy using modern Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    // Success path
+                    if (msg) {
+                        msg.textContent = `Copied ${promptType}!`;
+                        msg.classList.remove('opacity-0');
+                        msg.classList.add('opacity-100', 'text-green-400');
+                        setTimeout(() => {
+                            msg.classList.remove('opacity-100');
+                            msg.classList.add('opacity-0');
+                        }, 1500);
+                    }
+                }).catch(err => {
+                    // If modern API fails (e.g., permission denied), fall back
+                    console.warn("Clipboard API failed, attempting execCommand fallback:", err);
+                    attemptExecCommandCopy(copyText, promptType, msg);
+                });
+            } else {
+                // If navigator.clipboard is not available at all, fall back immediately
+                attemptExecCommandCopy(copyText, promptType, msg);
+            }
+        }
+        
+        function attemptExecCommandCopy(copyTextElement, promptType, msgElement) {
+             try {
+                // Fallback method using execCommand
+                copyTextElement.select(); 
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges(); // Deselect text
+                
+                // Show success message (for fallback)
+                if (msgElement) {
+                    msgElement.textContent = `Copied ${promptType}!`;
+                    msgElement.classList.remove('opacity-0');
+                    msgElement.classList.add('opacity-100', 'text-green-400');
+                    setTimeout(() => {
+                        msgElement.classList.remove('opacity-100');
+                        msgElement.classList.add('opacity-0');
+                    }, 1500);
+                }
+            } catch (execError) {
+                // Final failure
+                console.error('Final Copy Attempt Failed:', execError);
+                showMessage(`Copying ${promptType} failed. Please copy manually.`, 5000, true);
+            }
+        }
+
+
+        function getInputValue(selectId, inputId) {
+            const selectValue = document.getElementById(selectId)?.value;
+            const inputValue = document.getElementById(inputId)?.value.trim();
+            
+            if (inputValue) {
+                return inputValue; // Custom input overrides selection
+            }
+            if (selectValue) {
+                return selectValue; // Use selected value
+            }
+            return null;
+        }
+
+        // --- Exponential Backoff Fetcher ---
+        async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        if (response.status === 429 && i < retries - 1) { // Too many requests
+                            const delay = INITIAL_DELAY * (2 ** i) + Math.random() * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    const delay = INITIAL_DELAY * (2 ** i) + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        // --- Step Transitions ---
+        function toggleRequiredStar(fieldId, isRequired) {
+            const star = document.querySelector(`#${fieldId} .required-star`);
+            if (star) {
+                if (isRequired) {
+                    star.classList.add('required-star');
+                } else {
+                    star.classList.remove('required-star');
+                }
+            }
+        }
+
+        function setGoal(goal) {
+            promptData.outputGoal = goal;
+            document.getElementById('goal-display').textContent = goal;
+            
+            // Toggle visibility and required status for motion-related fields
+            const isScene = goal === 'Scene/Video';
+            
+            // 2. Action/State
+            document.getElementById('action-note').textContent = isScene ? 
+                'What is the subject doing? (REQUIRED for Scene/Video)' : 
+                'What is the subject doing, or what is their pose? (Optional for Image)';
+            toggleRequiredStar('field-action', isScene);
+
+            // 9. Camera Movement
+            const cameraMovementField = document.getElementById('field-camera-movement');
+            const cameraMovementNote = document.getElementById('camera-movement-note');
+            
+            if (isScene) {
+                cameraMovementField.classList.remove('hidden');
+                cameraMovementNote.textContent = 'Specify the camera\'s action. (REQUIRED for Scene/Video)';
+                toggleRequiredStar('field-camera-movement', true);
+            } else {
+                // Ensure it's treated as optional/hidden for Image
+                cameraMovementField.classList.add('hidden');
+                toggleRequiredStar('field-camera-movement', false);
+            }
+
+            // Move to Step 2
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        function validateAndCollectData() {
+            promptData.subject = getInputValue('subject-select', 'subject-input');
+            promptData.action = getInputValue('action-select', 'action-input');
+            promptData.scenery = getInputValue('scenery-select', 'scenery-input');
+            promptData.style = getInputValue('style-select', 'style-input');
+            promptData.styleMixer = document.getElementById('style-mixer-input').value.trim() || null; // New field, optional
+            promptData.cameraAngle = getInputValue('angle-select', 'angle-input'); 
+            promptData.lighting = getInputValue('lighting-select', 'lighting-input');
+            promptData.mood = getInputValue('mood-select', 'mood-input');
+            promptData.aspectRatio = getInputValue('aspect-ratio-select', 'aspect-ratio-input');
+            promptData.cameraMovement = getInputValue('camera-movement-select', 'camera-movement-input'); // New field, conditionally required
+            promptData.technicalModifiers = document.getElementById('technical-modifiers-input').value.trim() || null; // New field, optional
+
+
+            const requiredFields = [
+                { key: 'subject', name: 'Subject' },
+                { key: 'scenery', name: 'Scenery/Context' },
+                { key: 'style', name: 'Artistic Style' },
+                { key: 'lighting', name: 'Lighting/Ambiance' },
+                { key: 'mood', name: 'Mood/Atmosphere' },
+                { key: 'aspectRatio', name: 'Aspect Ratio' }
+            ];
+
+            let missingFields = [];
+
+            // Check primary required fields
+            requiredFields.forEach(field => {
+                if (!promptData[field.key]) {
+                    missingFields.push(field.name);
+                }
+            });
+
+            // Check conditional fields (Scene/Video)
+            if (promptData.outputGoal === 'Scene/Video') {
+                if (!promptData.action) missingFields.push('Action/State');
+                if (!promptData.cameraMovement) missingFields.push('Camera Movement');
+            }
+
+            if (missingFields.length > 0) {
+                showMessage(`Please fill in all required fields: ${missingFields.join(', ')}.`, 5000, true);
+                return false;
+            }
+
+            return true;
+        }
+
+        function generatePrompt() {
+            if (!validateAndCollectData()) {
+                return;
+            }
+
+            // Build Components
+            const composition = promptData.cameraAngle || 'detailed shot';
+            const movement = promptData.cameraMovement ? `, ${promptData.cameraMovement}` : '';
+            const actionPhrase = promptData.action ? `, ${promptData.action}` : '';
+            const styleBlender = promptData.styleMixer ? ` mixed with ${promptData.styleMixer}` : '';
+            const technical = promptData.technicalModifiers ? `, ${promptData.technicalModifiers}` : '';
+            
+            // Construct the prompt string
+            const finalPrompt = 
+                `${composition}${movement} of ${promptData.subject}${actionPhrase} in a ${promptData.scenery} setting. ` +
+                `The scene is illuminated with ${promptData.lighting} to create a ${promptData.mood} feel. ` +
+                `${promptData.style}${styleBlender}, photorealistic, cinematic, 8k${technical}, ${promptData.aspectRatio}.`;
+
+            document.getElementById('final-prompt-output').value = finalPrompt;
+            
+            // Update confirmation list
+            const list = document.getElementById('confirmation-list');
+            list.innerHTML = `
+                <p><span class="font-bold text-gray-200">Goal:</span> ${promptData.outputGoal}</p>
+                <p><span class="font-bold text-gray-200">1. Subject:</span> ${promptData.subject}</p>
+                <p><span class="font-bold text-gray-200">2. Action:</span> ${promptData.action || 'N/A (Static Image)'}</p>
+                <p><span class="font-bold text-gray-200">3. Scenery:</span> ${promptData.scenery}</p>
+                <p><span class="font-bold text-gray-200">4. Style:</span> ${promptData.style} ${promptData.styleMixer ? `(Blended with: ${promptData.styleMixer})` : ''}</p>
+                <p><span class="font-bold text-gray-200">5. Angle:</span> ${promptData.cameraAngle || 'Default Composition'}</p>
+                <p><span class="font-bold text-gray-200">6. Lighting:</span> ${promptData.lighting}</p>
+                <p><span class="font-bold text-gray-200">7. Mood:</span> ${promptData.mood}</p>
+                <p><span class="font-bold text-gray-200">8. Ratio:</span> ${promptData.aspectRatio}</p>
+                <p><span class="font-bold text-gray-200">9. Movement:</span> ${promptData.cameraMovement || 'N/A (Static Image)'}</p>
+                <p><span class="font-bold text-gray-200">10. Tech Mods:</span> ${promptData.technicalModifiers || 'N/A'}</p>
+            `;
+
+            // Clear the refinement and negative areas on new generation
+            document.getElementById('refined-prompt-output').value = '';
+            document.getElementById('refinement-area').classList.add('hidden');
+            document.getElementById('negative-prompt-output').value = '';
+            document.getElementById('negative-area').classList.add('hidden');
+
+            // Move to Step 3
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+        }
+
+        // --- Feature 1: Prompt Enhancement (Positive Prompt) ---
+        async function refinePromptWithGemini() {
+            const originalPrompt = document.getElementById('final-prompt-output').value;
+            const refineButton = document.getElementById('refine-button');
+            const loadingIndicator = document.getElementById('loading-indicator-refine');
+            const refinementArea = document.getElementById('refinement-area');
+            const refinedOutput = document.getElementById('refined-prompt-output');
+
+            if (!originalPrompt) {
+                showMessage("Please generate a base prompt first.", 3000, true);
+                return;
+            }
+
+            // UI state: Loading
+            refineButton.disabled = true;
+            refineButton.textContent = 'Enhancing...';
+            loadingIndicator.classList.remove('hidden');
+            refinementArea.classList.remove('hidden');
+            refinedOutput.value = '';
+
+            const systemPrompt = "Act as a prompt engineering expert. Take the user's text prompt for an image generator and expand it significantly by adding richer descriptive adjectives, cinematic lighting terms, composition details, technical keywords (like 16k, Octane render, photorealistic, depth of field), and overall enhancing the visual complexity and detail. Do not add any conversational text, introductory phrases, or explanations; only output the single, cohesive, refined prompt text.";
+            const userQuery = `Refine this image prompt: ${originalPrompt}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const response = await fetchWithRetry(`${API_URL}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Could not generate refined prompt.";
+
+                refinedOutput.value = generatedText;
+                showMessage("Prompt successfully enhanced by Gemini!", 3000);
+
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                refinedOutput.value = "An error occurred while connecting to the refinement service. Please try again.";
+                showMessage("Refinement failed. Check console for details.", 5000, true);
+            } finally {
+                // UI state: Done
+                refineButton.disabled = false;
+                refineButton.textContent = '✨ Enhance Prompt Detail';
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        // --- Feature 2: Negative Prompt Generation ---
+        async function generateNegativePromptWithGemini() {
+            const originalPrompt = document.getElementById('final-prompt-output').value;
+            const negativeButton = document.getElementById('negative-button');
+            const loadingIndicator = document.getElementById('loading-indicator-negative');
+            const negativeArea = document.getElementById('negative-area');
+            const negativeOutput = document.getElementById('negative-prompt-output');
+
+            const currentPositivePrompt = document.getElementById('refined-prompt-output').value || originalPrompt;
+
+
+            if (!currentPositivePrompt) {
+                showMessage("Please generate a base prompt first.", 3000, true);
+                return;
+            }
+
+            // UI state: Loading
+            negativeButton.disabled = true;
+            negativeButton.textContent = 'Generating...';
+            loadingIndicator.classList.remove('hidden');
+            negativeArea.classList.remove('hidden');
+            negativeOutput.value = '';
+
+            const systemPrompt = "Act as an expert negative prompt generator for high-detail image generation models. Analyze the user's positive prompt (which includes style, subject, and scene) and generate a single, highly effective, comma-separated list of keywords (the Negative Prompt). The list MUST include technical exclusion terms to prevent low quality, artifacts, and distortions, as well as semantic negatives relevant to the prompt's specified style and mood (e.g., if the style is photography, exclude illustration/cartoon). Do not use conversational text, introductory phrases, or explanations; only output the comma-separated negative prompt text.";
+            const userQuery = `Generate a negative prompt for this positive prompt: ${currentPositivePrompt}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const response = await fetchWithRetry(`${API_URL}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Could not generate negative prompt.";
+
+                negativeOutput.value = generatedText;
+                showMessage("Negative Prompt successfully generated!", 3000);
+
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                negativeOutput.value = "An error occurred while connecting to the negative prompt service. Please try again.";
+                showMessage("Negative prompt generation failed. Check console for details.", 5000, true);
+            } finally {
+                // UI state: Done
+                negativeButton.disabled = false;
+                negativeButton.textContent = '🚫 Generate Negative Prompt';
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+
+        function resetApp() {
+            // Reset state
+            promptData = { outputGoal: null, subject: null, action: null, scenery: null, style: null, styleMixer: null, cameraAngle: null, cameraMovement: null, lighting: null, mood: null, aspectRatio: null, technicalModifiers: null };
+            
+            // Reset form inputs
+            document.getElementById('subject-select').value = '';
+            document.getElementById('subject-input').value = '';
+            document.getElementById('action-select').value = '';
+            document.getElementById('action-input').value = '';
+            document.getElementById('scenery-select').value = '';
+            document.getElementById('scenery-input').value = '';
+            document.getElementById('style-select').value = '';
+            document.getElementById('style-input').value = '';
+            document.getElementById('style-mixer-input').value = ''; // New reset
+            document.getElementById('angle-select').value = '';
+            document.getElementById('angle-input').value = '';
+            document.getElementById('lighting-select').value = '';
+            document.getElementById('lighting-input').value = '';
+            document.getElementById('mood-select').value = '';
+            document.getElementById('mood-input').value = '';
+            document.getElementById('aspect-ratio-select').value = '';
+            document.getElementById('aspect-ratio-input').value = '';
+            document.getElementById('camera-movement-select').value = ''; // New reset
+            document.getElementById('camera-movement-input').value = ''; // New reset
+            document.getElementById('technical-modifiers-input').value = ''; // New reset
+            
+            document.getElementById('final-prompt-output').value = '';
+            document.getElementById('refined-prompt-output').value = '';
+            document.getElementById('refinement-area').classList.add('hidden');
+            document.getElementById('negative-prompt-output').value = '';
+            document.getElementById('negative-area').classList.add('hidden');
+
+            // Hide Camera Movement field initially
+            document.getElementById('field-camera-movement').classList.add('hidden');
+            toggleRequiredStar('field-action', false);
+            toggleRequiredStar('field-camera-movement', false);
+
+
+            // Return to Step 1
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
