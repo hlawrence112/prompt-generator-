@@ -130,7 +130,7 @@
                         </select>
                         <input type="text" id="style-input" placeholder="... or type a custom style (e.g., Watercolor, Claymation)" class="w-full mt-2 p-3 rounded-lg text-sm">
                         
-                        <!-- New: Style Mixer -->
+                        <!-- Style Mixer -->
                         <label for="style-mixer-input" class="block text-sm font-medium text-gray-400 mt-4">Style Mixer (Optional)</label>
                         <p class="text-xs text-gray-500 mb-1">Add a secondary style or artist to blend with your primary selection (e.g., "Art Nouveau" or "by Gustave Doré").</p>
                         <input type="text" id="style-mixer-input" placeholder="Type secondary style here" class="w-full mt-2 p-3 rounded-lg text-sm">
@@ -198,7 +198,7 @@
                         <input type="text" id="aspect-ratio-input" placeholder="... or type a custom ratio (e.g., 5:4)" class="w-full mt-2 p-3 rounded-lg text-sm">
                     </div>
                     
-                    <!-- 9. Camera Movement (New Field) -->
+                    <!-- 9. Camera Movement -->
                     <div id="field-camera-movement">
                         <label for="camera-movement-input" class="block text-sm font-medium text-gray-300 required-star">9. Camera Movement (Cinematic Control)</label>
                         <p class="text-xs text-gray-500 mb-1" id="camera-movement-note">Specify the camera's action. (Required for Scene/Video)</p>
@@ -213,7 +213,7 @@
                         <input type="text" id="camera-movement-input" placeholder="... or type a custom movement (e.g., Crane shot ascending)" class="w-full mt-2 p-3 rounded-lg text-sm">
                     </div>
                     
-                    <!-- 10. Technical Modifiers (New Field) -->
+                    <!-- 10. Technical Modifiers -->
                     <div id="field-technical-modifiers">
                         <label for="technical-modifiers-input" class="block text-sm font-medium text-gray-300">10. Technical Modifiers (Optional)</label>
                         <p class="text-xs text-gray-500 mb-1">Add specific high-impact keywords for rendering and quality (e.g., ZBrush, Subsurface Scattering, UE5).</p>
@@ -247,56 +247,12 @@
                 
                 <hr class="my-6 border-gray-700">
 
-                <h3 class="text-xl font-medium text-emerald-400 mb-4">🚀 LLM Powered Refinements</h3>
-                
-                <!-- Prompt Enhancement Feature -->
-                <h4 class="text-lg font-medium text-emerald-300 mb-2">✨ 1. Enhance Positive Prompt Detail</h4>
-                <p class="text-sm text-gray-400 mb-3">Expand your synthesized prompt with cinematic detail, extra keywords, and advanced technical parameters.</p>
-                
-                <button onclick="refinePromptWithGemini()" id="refine-button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 focus:ring-4 focus:ring-emerald-500 focus:ring-opacity-50">
-                    ✨ Enhance Prompt Detail
-                </button>
-
-                <div id="refinement-area" class="mt-4 hidden">
-                    <div id="loading-indicator-refine" class="text-center text-indigo-400 p-4 hidden">
-                        <div class="animate-spin inline-block w-6 h-6 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full"></div>
-                        <p class="mt-2">Refining prompt with LLM...</p>
-                    </div>
-                    
-                    <h5 class="text-base font-medium text-white mb-2" id="refined-prompt-title">Enhanced Prompt:</h5>
-                    <textarea id="refined-prompt-output" rows="8" readonly class="w-full p-3 rounded-lg border-2 border-emerald-500 text-base text-white resize-none"></textarea>
-                    
-                    <button onclick="copyToClipboard('refined-prompt-output')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg mt-4 transition duration-200">
-                        Copy Enhanced Prompt
-                    </button>
-                    <!-- NEW: Confirmation message for Enhanced Prompt -->
-                    <p id="copy-message-enhanced" class="text-center mt-2 text-sm text-green-400 opacity-0 transition duration-300">Copied Enhanced Prompt!</p>
-                </div>
-
-                <hr class="my-6 border-gray-700">
-
-                <!-- Negative Prompt Feature -->
-                <h4 class="text-lg font-medium text-rose-300 mb-2">🚫 2. Generate Negative Prompt</h4>
-                <p class="text-sm text-gray-400 mb-3">Generate a list of exclusion keywords to prevent common errors, artifacts, and undesirable elements based on your style/mood.</p>
-                
-                <button onclick="generateNegativePromptWithGemini()" id="negative-button" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 focus:ring-4 focus:ring-rose-500 focus:ring-opacity-50">
-                    🚫 Generate Negative Prompt
-                </button>
-
-                <div id="negative-area" class="mt-4 hidden">
-                    <div id="loading-indicator-negative" class="text-center text-indigo-400 p-4 hidden">
-                        <div class="animate-spin inline-block w-6 h-6 border-4 border-t-4 border-indigo-500 border-t-transparent rounded-full"></div>
-                        <p class="mt-2">Generating negative keywords with LLM...</p>
-                    </div>
-                    
-                    <h5 class="text-base font-medium text-white mb-2">Negative Prompt:</h5>
-                    <textarea id="negative-prompt-output" rows="4" readonly class="w-full p-3 rounded-lg border-2 border-rose-500 text-base text-white resize-none"></textarea>
-                    
-                    <button onclick="copyToClipboard('negative-prompt-output')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg mt-4 transition duration-200">
-                        Copy Negative Prompt
-                    </button>
-                    <!-- NEW: Confirmation message for Negative Prompt -->
-                    <p id="copy-message-negative" class="text-center mt-2 text-sm text-green-400 opacity-0 transition duration-300">Copied Negative Prompt!</p>
+                <!-- Manual Refinement Tip (Replaces LLM features) -->
+                <div class="p-4 bg-gray-800 rounded-lg">
+                    <h4 class="text-lg font-medium text-emerald-400 mb-2">Manual Enhancement Tip</h4>
+                    <p class="text-sm text-gray-400">
+                        To achieve the highly detailed results of the removed enhancement feature, copy your synthesized prompt above and manually add extra descriptive details (e.g., "ultra-detailed textures," "dramatic deep shadows," "subsurface scattering") directly into your generator's prompt field.
+                    </p>
                 </div>
 
 
@@ -317,20 +273,14 @@
             action: null,
             scenery: null,
             style: null,
-            styleMixer: null, // New
+            styleMixer: null,
             cameraAngle: null, 
-            cameraMovement: null, // New
+            cameraMovement: null,
             lighting: null,
             mood: null,
             aspectRatio: null,
-            technicalModifiers: null // New
+            technicalModifiers: null
         };
-
-        // --- Gemini API Setup ---
-        const apiKey = "AIzaSyCJjZ0dhRr_bZd2E2h3hHvNJ_vUZCnQFiA"; // <--- Key is set here
-        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
-        const MAX_RETRIES = 3;
-        const INITIAL_DELAY = 1000;
 
         // --- Utility Functions ---
         function showMessage(text, duration = 3000, isError = false) {
@@ -346,26 +296,14 @@
             const copyText = document.getElementById(elementId);
             const textToCopy = copyText.value;
             
-            // 1. Determine prompt type and message element ID
-            let promptType = 'Prompt';
-            let msgId = 'copy-message'; 
-            
-            if (elementId.includes('negative')) {
-                promptType = 'Negative Prompt';
-                msgId = 'copy-message-negative';
-            } else if (elementId.includes('refined')) {
-                promptType = 'Enhanced Prompt';
-                msgId = 'copy-message-enhanced';
-            }
+            const msg = document.getElementById('copy-message'); // Only using the single main message now
 
-            const msg = document.getElementById(msgId);
-
-            // 2. Attempt copy using modern Clipboard API
+            // 1. Attempt copy using modern Clipboard API
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     // Success path
                     if (msg) {
-                        msg.textContent = `Copied ${promptType}!`;
+                        msg.textContent = 'Copied!';
                         msg.classList.remove('opacity-0');
                         msg.classList.add('opacity-100', 'text-green-400');
                         setTimeout(() => {
@@ -374,17 +312,17 @@
                         }, 1500);
                     }
                 }).catch(err => {
-                    // If modern API fails (e.g., permission denied), fall back
+                    // Fallback attempt
                     console.warn("Clipboard API failed, attempting execCommand fallback:", err);
-                    attemptExecCommandCopy(copyText, promptType, msg);
+                    attemptExecCommandCopy(copyText, msg);
                 });
             } else {
                 // If navigator.clipboard is not available at all, fall back immediately
-                attemptExecCommandCopy(copyText, promptType, msg);
+                attemptExecCommandCopy(copyText, msg);
             }
         }
         
-        function attemptExecCommandCopy(copyTextElement, promptType, msgElement) {
+        function attemptExecCommandCopy(copyTextElement, msgElement) {
              try {
                 // Fallback method using execCommand
                 copyTextElement.select(); 
@@ -393,7 +331,7 @@
                 
                 // Show success message (for fallback)
                 if (msgElement) {
-                    msgElement.textContent = `Copied ${promptType}!`;
+                    msgElement.textContent = 'Copied!';
                     msgElement.classList.remove('opacity-0');
                     msgElement.classList.add('opacity-100', 'text-green-400');
                     setTimeout(() => {
@@ -404,7 +342,7 @@
             } catch (execError) {
                 // Final failure
                 console.error('Final Copy Attempt Failed:', execError);
-                showMessage(`Copying ${promptType} failed. Please copy manually.`, 5000, true);
+                showMessage('Copying failed. Please copy manually.', 5000, true);
             }
         }
 
@@ -420,28 +358,6 @@
                 return selectValue; // Use selected value
             }
             return null;
-        }
-
-        // --- Exponential Backoff Fetcher ---
-        async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (!response.ok) {
-                        if (response.status === 429 && i < retries - 1) { // Too many requests
-                            const delay = INITIAL_DELAY * (2 ** i) + Math.random() * 1000;
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            continue;
-                        }
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response;
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                    const delay = INITIAL_DELAY * (2 ** i) + Math.random() * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
         }
 
         // --- Step Transitions ---
@@ -493,13 +409,13 @@
             promptData.action = getInputValue('action-select', 'action-input');
             promptData.scenery = getInputValue('scenery-select', 'scenery-input');
             promptData.style = getInputValue('style-select', 'style-input');
-            promptData.styleMixer = document.getElementById('style-mixer-input').value.trim() || null; // New field, optional
+            promptData.styleMixer = document.getElementById('style-mixer-input').value.trim() || null;
             promptData.cameraAngle = getInputValue('angle-select', 'angle-input'); 
             promptData.lighting = getInputValue('lighting-select', 'lighting-input');
             promptData.mood = getInputValue('mood-select', 'mood-input');
             promptData.aspectRatio = getInputValue('aspect-ratio-select', 'aspect-ratio-input');
-            promptData.cameraMovement = getInputValue('camera-movement-select', 'camera-movement-input'); // New field, conditionally required
-            promptData.technicalModifiers = document.getElementById('technical-modifiers-input').value.trim() || null; // New field, optional
+            promptData.cameraMovement = getInputValue('camera-movement-select', 'camera-movement-input');
+            promptData.technicalModifiers = document.getElementById('technical-modifiers-input').value.trim() || null;
 
 
             const requiredFields = [
@@ -544,13 +460,14 @@
             const movement = promptData.cameraMovement ? `, ${promptData.cameraMovement}` : '';
             const actionPhrase = promptData.action ? `, ${promptData.action}` : '';
             const styleBlender = promptData.styleMixer ? ` mixed with ${promptData.styleMixer}` : '';
+            // Note: Removed the automatic 'photorealistic, cinematic, 8k' and rely on user input/keywords
             const technical = promptData.technicalModifiers ? `, ${promptData.technicalModifiers}` : '';
             
             // Construct the prompt string
             const finalPrompt = 
                 `${composition}${movement} of ${promptData.subject}${actionPhrase} in a ${promptData.scenery} setting. ` +
                 `The scene is illuminated with ${promptData.lighting} to create a ${promptData.mood} feel. ` +
-                `${promptData.style}${styleBlender}, photorealistic, cinematic, 8k${technical}, ${promptData.aspectRatio}.`;
+                `${promptData.style}${styleBlender}${technical}, ${promptData.aspectRatio}.`;
 
             document.getElementById('final-prompt-output').value = finalPrompt;
             
@@ -570,128 +487,9 @@
                 <p><span class="font-bold text-gray-200">10. Tech Mods:</span> ${promptData.technicalModifiers || 'N/A'}</p>
             `;
 
-            // Clear the refinement and negative areas on new generation
-            document.getElementById('refined-prompt-output').value = '';
-            document.getElementById('refinement-area').classList.add('hidden');
-            document.getElementById('negative-prompt-output').value = '';
-            document.getElementById('negative-area').classList.add('hidden');
-
             // Move to Step 3
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.remove('hidden');
-        }
-
-        // --- Feature 1: Prompt Enhancement (Positive Prompt) ---
-        async function refinePromptWithGemini() {
-            const originalPrompt = document.getElementById('final-prompt-output').value;
-            const refineButton = document.getElementById('refine-button');
-            const loadingIndicator = document.getElementById('loading-indicator-refine');
-            const refinementArea = document.getElementById('refinement-area');
-            const refinedOutput = document.getElementById('refined-prompt-output');
-
-            if (!originalPrompt) {
-                showMessage("Please generate a base prompt first.", 3000, true);
-                return;
-            }
-
-            // UI state: Loading
-            refineButton.disabled = true;
-            refineButton.textContent = 'Enhancing...';
-            loadingIndicator.classList.remove('hidden');
-            refinementArea.classList.remove('hidden');
-            refinedOutput.value = '';
-
-            const systemPrompt = "Act as a prompt engineering expert. Take the user's text prompt for an image generator and expand it significantly by adding richer descriptive adjectives, cinematic lighting terms, composition details, technical keywords (like 16k, Octane render, photorealistic, depth of field), and overall enhancing the visual complexity and detail. Do not add any conversational text, introductory phrases, or explanations; only output the single, cohesive, refined prompt text.";
-            const userQuery = `Refine this image prompt: ${originalPrompt}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-            };
-
-            try {
-                const response = await fetchWithRetry(`${API_URL}?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Could not generate refined prompt.";
-
-                refinedOutput.value = generatedText;
-                showMessage("Prompt successfully enhanced by Gemini!", 3000);
-
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                refinedOutput.value = "An error occurred while connecting to the refinement service. Please try again.";
-                showMessage("Refinement failed. Check console for details.", 5000, true);
-            } finally {
-                // UI state: Done
-                refineButton.disabled = false;
-                refineButton.textContent = '✨ Enhance Prompt Detail';
-                loadingIndicator.classList.add('hidden');
-            }
-        }
-
-        // --- Feature 2: Negative Prompt Generation ---
-        async function generateNegativePromptWithGemini() {
-            const originalPrompt = document.getElementById('final-prompt-output').value;
-            const negativeButton = document.getElementById('negative-button');
-            const loadingIndicator = document.getElementById('loading-indicator-negative');
-            const negativeArea = document.getElementById('negative-area');
-            const negativeOutput = document.getElementById('negative-prompt-output');
-
-            const currentPositivePrompt = document.getElementById('refined-prompt-output').value || originalPrompt;
-
-
-            if (!currentPositivePrompt) {
-                showMessage("Please generate a base prompt first.", 3000, true);
-                return;
-            }
-
-            // UI state: Loading
-            negativeButton.disabled = true;
-            negativeButton.textContent = 'Generating...';
-            loadingIndicator.classList.remove('hidden');
-            negativeArea.classList.remove('hidden');
-            negativeOutput.value = '';
-
-            const systemPrompt = "Act as an expert negative prompt generator for high-detail image generation models. Analyze the user's positive prompt (which includes style, subject, and scene) and generate a single, highly effective, comma-separated list of keywords (the Negative Prompt). The list MUST include technical exclusion terms to prevent low quality, artifacts, and distortions, as well as semantic negatives relevant to the prompt's specified style and mood (e.g., if the style is photography, exclude illustration/cartoon). Do not use conversational text, introductory phrases, or explanations; only output the comma-separated negative prompt text.";
-            const userQuery = `Generate a negative prompt for this positive prompt: ${currentPositivePrompt}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-            };
-
-            try {
-                const response = await fetchWithRetry(`${API_URL}?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Could not generate negative prompt.";
-
-                negativeOutput.value = generatedText;
-                showMessage("Negative Prompt successfully generated!", 3000);
-
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                negativeOutput.value = "An error occurred while connecting to the negative prompt service. Please try again.";
-                showMessage("Negative prompt generation failed. Check console for details.", 5000, true);
-            } finally {
-                // UI state: Done
-                negativeButton.disabled = false;
-                negativeButton.textContent = '🚫 Generate Negative Prompt';
-                loadingIndicator.classList.add('hidden');
-            }
         }
 
 
@@ -708,7 +506,7 @@
             document.getElementById('scenery-input').value = '';
             document.getElementById('style-select').value = '';
             document.getElementById('style-input').value = '';
-            document.getElementById('style-mixer-input').value = ''; // New reset
+            document.getElementById('style-mixer-input').value = '';
             document.getElementById('angle-select').value = '';
             document.getElementById('angle-input').value = '';
             document.getElementById('lighting-select').value = '';
@@ -717,15 +515,11 @@
             document.getElementById('mood-input').value = '';
             document.getElementById('aspect-ratio-select').value = '';
             document.getElementById('aspect-ratio-input').value = '';
-            document.getElementById('camera-movement-select').value = ''; // New reset
-            document.getElementById('camera-movement-input').value = ''; // New reset
-            document.getElementById('technical-modifiers-input').value = ''; // New reset
+            document.getElementById('camera-movement-select').value = '';
+            document.getElementById('camera-movement-input').value = '';
+            document.getElementById('technical-modifiers-input').value = '';
             
             document.getElementById('final-prompt-output').value = '';
-            document.getElementById('refined-prompt-output').value = '';
-            document.getElementById('refinement-area').classList.add('hidden');
-            document.getElementById('negative-prompt-output').value = '';
-            document.getElementById('negative-area').classList.add('hidden');
 
             // Hide Camera Movement field initially
             document.getElementById('field-camera-movement').classList.add('hidden');
