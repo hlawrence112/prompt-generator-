@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,638 +5,715 @@
     <title>PGA Prompt Generator Assistant</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
+        /* Custom Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* Dark Navy Palette */
+        :root {
+            --color-background: #10192A; 
+            --color-card: #1C263A; 
+            --color-primary: #6366F1; /* Indigo */
+            --color-text-light: #F3F4F6; /* Light Gray */
+            --color-text-dim: #9CA3AF; /* Muted Gray */
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #131a2e; /* Deep Desaturated Navy/Purple */
+            background-color: var(--color-background);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem 0;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e2947; /* Card background color */
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4a5568; /* Scrollbar thumb */
-            border-radius: 4px;
-        }
-        .card {
-            background-color: #1e2947; /* Rich dark blue for main card */
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5); /* Increased shadow depth */
-        }
-        /* Set color for inputs, select, options, and textarea to white for max contrast */
+
+        /* Enforce White Text on Inputs/Selects for Readability */
         input[type="text"], select, textarea, option {
-            background-color: #131a2e; /* Match body background for input fields */
-            border: 1px solid #30363d;
-            color: #FFFFFF !important; /* IMPORTANT FIX: Added !important to override default browser styles */
+            color: #FFFFFF !important; /* Forces white text to override browser defaults */
+            background-color: rgba(0, 0, 0, 0.4); /* Slightly transparent dark background for input */
+            border-color: #374151;
+            transition: all 0.2s;
         }
-        /* Style for placeholder text */
-        input::placeholder, textarea::placeholder {
-            color: #9CA3AF; /* Light gray for placeholder hint text */
+
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: #A0AEC0 !important; /* Brightened placeholder text */
         }
-        .required-star:after {
-            content: "*";
-            color: #f87171;
-            margin-left: 4px;
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 1px var(--color-primary);
+        }
+
+        .confirmation-message {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .error-message {
+            color: #F87171; /* Red */
         }
     </style>
 </head>
-<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
+<body class="p-4 sm:p-8">
 
-    <div id="app-container" class="w-full max-w-4xl">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-white mb-2">Prompt Generator Assistant (PGA)</h1>
-            <p class="text-gray-400">Structured prompt creation for generative AI.</p>
+    <div id="pga-app" class="w-full max-w-4xl bg-white bg-opacity-5 backdrop-blur-sm p-6 sm:p-8 rounded-xl shadow-2xl border border-indigo-700/50">
+        
+        <!-- HEADER -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white">Prompt Generator Assistant (PGA)</h1>
+            <p class="text-indigo-300 mt-1 text-lg">Structured prompt creation for generative AI.</p>
         </header>
 
-        <!-- Main Card Container -->
-        <div class="card p-6 rounded-xl">
+        <main>
             <!-- Step 1: Output Goal -->
-            <div id="step1" class="text-center">
-                <h2 class="text-xl font-semibold text-white mb-4">Step 1: Determine the Output Goal</h2>
-                <p class="text-gray-300 mb-6">Is this prompt for a static image/illustration, or for a scene involving motion (e.g., a video or an animated sequence with specific character actions)?</p>
-                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <button onclick="setGoal('Image')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200">
-                        Static Image/Illustration
+            <section id="step-1">
+                <h2 class="text-2xl font-bold mb-4 text-indigo-400">Step 1: Determine the Output Goal</h2>
+                <p class="text-gray-300 mb-6">First, decide if you are creating a static image or a scene with required motion.</p>
+                
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button onclick="setGoal('Image')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200" id="goal-image">
+                        🖼️ Static Image/Illustration
                     </button>
-                    <button onclick="setGoal('Scene/Video')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200">
-                        Scene/Video (Motion)
+                    <button onclick="setGoal('Scene/Video')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200" id="goal-scene">
+                        🎬 Scene/Video (Motion Required)
                     </button>
                 </div>
-            </div>
 
-            <!-- Step 2: Selection Options -->
-            <div id="step2" class="hidden">
-                <h2 class="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3">Step 2: Define Parameters (<span id="goal-display" class="font-bold text-lg"></span>)</h2>
-                <div id="form-container" class="space-y-6">
+                <p id="goal-message" class="mt-4 text-center font-medium text-lg hidden"></p>
+            </section>
 
-                    <!-- 1. Subject -->
-                    <div id="field-subject">
-                        <label for="subject-input" class="block text-sm font-medium text-gray-300 required-star">1. Subject/Character(s)</label>
-                        <p class="text-xs text-gray-500 mb-1">Choose the main subject(s). Be descriptive.</p>
-                        <select id="subject-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Character —</option>
+            <hr class="border-t border-indigo-500/30 my-8">
+
+            <!-- Step 2: Define Parameters -->
+            <section id="step-2" class="hidden">
+                <h2 class="text-2xl font-bold mb-6 text-indigo-400">Step 2: Define Parameters (<span id="step-2-goal"></span>)</h2>
+                
+                <form id="prompt-form" onsubmit="generatePrompt(event)" class="space-y-6">
+
+                    <!-- 1. Subject/Character(s) -->
+                    <div>
+                        <label for="subject" class="block text-xl font-medium mb-1 text-gray-200">1. Subject/Character(s) <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">Choose the main subject(s). Be descriptive.</p>
+                        <select id="subject" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Suggested Subject —</option>
                             <option value="A stoic, elderly fisherman of East Asian descent">A stoic, elderly fisherman of East Asian descent</option>
-                            <option value="Young woman of West African descent, a brilliant scientist">Young woman of West African descent, a brilliant scientist</option>
-                            <option value="Non-binary person with brightly colored hair, a street artist">Non-binary person with brightly colored hair, a street artist</option>
-                            <option value="A rugged cyberpunk detective in trench coat">A rugged cyberpunk detective in trench coat</option>
-                            <option value="A majestic griffin perched on a spire">A majestic griffin perched on a spire</option>
-                            <option value="An ancient robotic automaton with moss growing on its frame">An ancient robotic automaton with moss growing on its frame</option>
-                            <option value="A group of diverse teenagers on skateboards">A group of diverse teenagers on skateboards</option>
-                            <option value="A knight in battered, heavy plate armor">A knight in battered, heavy plate armor</option>
-                            <option value="A lonely deep-sea diver exploring an abyss">A lonely deep-sea diver exploring an abyss</option>
-                            <option value="A whimsical forest sprite riding a giant beetle">A whimsical forest sprite riding a giant beetle</option>
-                            <option value="A mysterious masked rogue scaling a wall">A mysterious masked rogue scaling a wall</option>
-                            <option value="An astronaut performing repairs outside a shuttle">An astronaut performing repairs outside a shuttle</option>
-                            <option value="A musician playing an ethereal instrument in a cave">A musician playing an ethereal instrument</soption>
-                            <option value="A tired librarian organizing ancient texts">A tired librarian organizing ancient texts</option>
+                            <option value="A young woman of West African descent, a brilliant botanist">A young woman of West African descent, a brilliant botanist</option>
+                            <option value="A non-binary person with brightly colored hair, a professional coder">A non-binary person with brightly colored hair, a professional coder</option>
+                            <option value="A person in a futuristic military uniform, standing at attention">A person in a futuristic military uniform, standing at attention</option>
+                            <option value="A majestic griffin with obsidian feathers and golden eyes">A majestic griffin with obsidian feathers and golden eyes</option>
+                            <option value="A lone wolf howling at two moons on a frozen tundra">A lone wolf howling at two moons on a frozen tundra</option>
+                            <option value="A child wearing a rusty antique diving helmet">A child wearing a rusty antique diving helmet</option>
+                            <option value="A group of diverse teenagers on skateboards at dusk">A group of diverse teenagers on skateboards at dusk</option>
+                            <option value="A sleek, black hydrogen-powered sports car">A sleek, black hydrogen-powered sports car</option>
+                            <option value="An ancient, sentient clockwork automaton">An ancient, sentient clockwork automaton</option>
+                            <option value="A young sorceress channeling raw elemental energy">A young sorceress channeling raw elemental energy</option>
+                            <option value="A cybernetic samurai warrior in traditional armor">A cybernetic samurai warrior in traditional armor</option>
+                            <option value="A seasoned desert nomad carrying a large staff">A seasoned desert nomad carrying a large staff</option>
+                            <option value="A vibrant hummingbird hovering over a giant alien flower">A vibrant hummingbird hovering over a giant alien flower</option>
+                            <option value="A mysterious figure wearing a wide-brimmed hat">A mysterious figure wearing a wide-brimmed hat</option>
+                            <option value="A busy market vendor haggling over exotic goods">A busy market vendor haggling over exotic goods</option>
+                            <option value="A pirate captain with a mechanical eye patch">A pirate captain with a mechanical eye patch</option>
+                            <option value="A small, terrified kitten huddled in a dark corner">A small, terrified kitten huddled in a dark corner</option>
                         </select>
-                        <input type="text" id="subject-input" placeholder="... or type your own subject here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="subject-custom" placeholder="... or type your own subject here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
                     <!-- 2. Action/State -->
-                    <div id="field-action">
-                        <label for="action-input" class="block text-sm font-medium text-gray-300 required-star">2. Action/State</label>
-                        <p class="text-xs text-gray-500 mb-1" id="action-note">What is the subject doing? (Required for Scene/Video)</p>
-                        <select id="action-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Action —</option>
-                            <option value="Running through a crowded street">Running through a crowded street</option>
-                            <option value="Gently turning their head to look over their shoulder">Gently turning their head to look over their shoulder</option>
-                            <option value="Sitting pensively by a window">Sitting pensively by a window</option>
-                            <option value="Standing on the edge of a precipice">Standing on the edge of a precipice</option>
-                            <option value="Floating peacefully in water">Floating peacefully in water</option>
-                            <option value="Leaping across rooftops under a full moon">Leaping across rooftops</option>
-                            <option value="Casting a powerful, arcane spell">Casting a powerful, arcane spell</option>
-                            <option value="Receiving a cryptic transmission on an old radio">Receiving a cryptic transmission</option>
-                            <option value="Gazing silently at a star map">Gazing silently at a star map</option>
-                            <option value="Sharpening a long, elegant sword at midnight">Sharpening a long, elegant sword</option>
-                            <option value="Engaged in a tense, silent standoff">Engaged in a tense, silent standoff</option>
-                            <option value="Dancing wildly in a sudden rainstorm">Dancing wildly in a sudden rainstorm</option>
-                            <option value="Screaming in agony, facing a huge shadow">Screaming in agony</option>
-                            <option value="Wading through thick jungle undergrowth">Wading through thick jungle undergrowth</option>
-                            <option value="Mending an intricate piece of clockwork machinery">Mending clockwork machinery</option>
+                    <div>
+                        <label for="action" class="block text-xl font-medium mb-1 text-gray-200">2. Action/State <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2" id="action-instruction">What is the subject doing? (REQUIRED for Scene/Video)</p>
+                        <select id="action" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Suggested Action —</option>
+                            <option value="Running through a crowded street, looking back nervously">Running through a crowded street, looking back nervously</option>
+                            <option value="Gently turning their head to look over their shoulder, smiling">Gently turning their head to look over their shoulder, smiling</option>
+                            <option value="Sitting pensively by a window, watching the rain">Sitting pensively by a window, watching the rain</option>
+                            <option value="Standing on the edge of a precipice, gazing into the distance">Standing on the edge of a precipice, gazing into the distance</option>
+                            <option value="Floating peacefully in a dark, still body of water">Floating peacefully in a dark, still body of water</option>
+                            <option value="Leaping across rooftops in a dynamic, heroic pose">Leaping across rooftops in a dynamic, heroic pose</option>
+                            <option value="Receiving a cryptic transmission on an antique radio">Receiving a cryptic transmission on an antique radio</option>
+                            <option value="Slowly drawing an ancient, glowing sword">Slowly drawing an ancient, glowing sword</option>
+                            <option value="Working intently on a complex piece of clockwork machinery">Working intently on a complex piece of clockwork machinery</option>
+                            <option value="Dancing wildly under bright, flashing disco lights">Dancing wildly under bright, flashing disco lights</option>
+                            <option value="Reading an old, leather-bound book by candlelight">Reading an old, leather-bound book by candlelight</option>
+                            <option value="Riding a futuristic hoverbike over a canyon">Riding a futuristic hoverbike over a canyon</option>
+                            <option value="Hiding behind a stack of crates in a warehouse">Hiding behind a stack of crates in a warehouse</option>
+                            <option value="Meditating amidst swirling desert sands">Meditating amidst swirling desert sands</option>
+                            <option value="Drawing a complex equation on a foggy glass window">Drawing a complex equation on a foggy glass window</option>
+                            <option value="Gazing upward at a meteor shower">Gazing upward at a meteor shower</option>
+                            <option value="Washing their face with clear mountain spring water">Washing their face with clear mountain spring water</option>
+                            <option value="Climbing a sheer, icy cliff face">Climbing a sheer, icy cliff face</option>
                         </select>
-                        <input type="text" id="action-input" placeholder="... or type your own action/state here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="action-custom" placeholder="... or type your own action/state here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
                     <!-- 3. Scenery/Context -->
-                    <div id="field-scenery">
-                        <label for="scenery-input" class="block text-sm font-medium text-gray-300 required-star">3. Scenery/Context</label>
-                        <p class="text-xs text-gray-500 mb-1">Where and when is the subject located?</p>
-                        <select id="scenery-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Scenery —</option>
+                    <div>
+                        <label for="scenery" class="block text-xl font-medium mb-1 text-gray-200">3. Scenery/Context <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">Where and when is the subject located?</p>
+                        <select id="scenery" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Suggested Scenery —</option>
                             <option value="A futuristic neon-drenched cityscape at midnight">A futuristic neon-drenched cityscape at midnight</option>
                             <option value="An ancient, overgrown temple ruin deep in a rainforest">An ancient, overgrown temple ruin deep in a rainforest</option>
-                            <option value="A cozy, wood-paneled library during a snowstorm">A cozy, wood-paneled library during a snowstorm</option>
+                            <option value="A cozy, wood-paneled library during a heavy snowstorm">A cozy, wood-paneled library during a heavy snowstorm</option>
                             <option value="The vast, desolate landscape of a red desert planet">The vast, desolate landscape of a red desert planet</option>
-                            <option value="The deck of a sailing ship on a stormy sea">The deck of a sailing ship on a stormy sea</option>
-                            <option value="Abandoned, derelict space station corridor">Abandoned, derelict space station corridor</option>
-                            <option value="A busy Victorian cobbled alley at dusk">A busy Victorian cobbled alley at dusk</option>
-                            <option value="An infinite, bioluminescent cavern beneath the ocean">An infinite, bioluminescent cavern</option>
-                            <option value="A sun-drenched European town square in summer">A sun-drenched European town square</option>
-                            <option value="A towering medieval castle besieged by fog">A towering medieval castle besieged by fog</option>
-                            <option value="The dusty main street of a Wild West town at noon">The dusty main street of a Wild West town</option>
-                            <option value="A vibrant, swirling nebula in deep space">A vibrant, swirling nebula in deep space</option>
-                            <option value="A sterile, chrome laboratory under lockdown">A sterile, chrome laboratory under lockdown</option>
-                            <option value="A field of tall, golden wheat stalks at sunset">A field of tall, golden wheat stalks at sunset</option>
-                            <option value="A flooded, post-apocalyptic subway tunnel">A flooded, post-apocalyptic subway tunnel</option>
+                            <option value="The deck of a sailing ship on a stormy sea at dawn">The deck of a sailing ship on a stormy sea at dawn</option>
+                            <option value="An abandoned space station orbiting a blue giant star">An abandoned space station orbiting a blue giant star</option>
+                            <option value="A smoggy, Victorian cobbled alleyway at 3 AM">A smoggy, Victorian cobbled alleyway at 3 AM</option>
+                            <option value="The inside of a bioluminescent cavern with glowing fungi">The inside of a bioluminescent cavern with glowing fungi</option>
+                            <option value="A misty mountain peak overlooking a cloud inversion">A misty mountain peak overlooking a cloud inversion</option>
+                            <option value="A quiet, sun-drenched cafe in Paris during the summer">A quiet, sun-drenched cafe in Paris during the summer</option>
+                            <option value="A medieval marketplace bustling with vendors and knights">A medieval marketplace bustling with vendors and knights</option>
+                            <option value="A deep sea trench with bizarre, fluorescent marine life">A deep sea trench with bizarre, fluorescent marine life</option>
+                            <option value="A pristine Japanese Zen garden in autumn">A pristine Japanese Zen garden in autumn</option>
+                            <option value="A massive, steampunk industrial factory">A massive, steampunk industrial factory</option>
+                            <option value="A shimmering ice palace carved into a glacier">A shimmering ice palace carved into a glacier</option>
+                            <option value="A crumbling, war-torn city square at twilight">A crumbling, war-torn city square at twilight</option>
+                            <option value="A field of towering, iridescent wheat">A field of towering, iridescent wheat</option>
+                            <option value="The brightly lit backstage of a jazz club">The brightly lit backstage of a jazz club</option>
                         </select>
-                        <input type="text" id="scenery-input" placeholder="... or type your own scenery/context here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="scenery-custom" placeholder="... or type your own scenery/context here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
-                    <!-- 4. Artistic Style/Medium + Style Mixer -->
-                    <div id="field-style">
-                        <label for="style-input" class="block text-sm font-medium text-gray-300 required-star">4. Artistic Style/Medium</label>
-                        <p class="text-xs text-gray-500 mb-1">What is the desired aesthetic (medium, style, or technique)?</p>
-                        <select id="style-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Style —</option>
-                            <option value="Concept Art (highly rendered)">Concept Art (highly rendered)</option>
+                    <!-- 4. Artistic Style/Medium -->
+                    <div>
+                        <label for="style" class="block text-xl font-medium mb-1 text-gray-200">4. Artistic Style/Medium <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">What is the desired aesthetic (e.g., medium, technique)?</p>
+                        <select id="style" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Primary Style —</option>
+                            <option value="Concept Art (Highly Detailed)">Concept Art (Highly Detailed)</option>
                             <option value="Oil Painting (Impressionist style)">Oil Painting (Impressionist style)</option>
                             <option value="Cyberpunk Film Noir">Cyberpunk Film Noir</option>
                             <option value="High-Detail CGI Render">High-Detail CGI Render</option>
-                            <option value="Ghibli-Inspired Anime">Ghibli-Inspired Anime</option>
-                            <option value="Pencil Sketch">Pencil Sketch</option>
+                            <option value="Ghibli-Inspired Anime (Hand-drawn look)">Ghibli-Inspired Anime (Hand-drawn look)</option>
+                            <option value="Charcoal and Graphite Sketch">Charcoal and Graphite Sketch</option>
                             <option value="Digital Illustration (Hyper-realistic)">Digital Illustration (Hyper-realistic)</option>
-                            <option value="Ukiyo-e woodblock print">Ukiyo-e woodblock print</option>
-                            <option value="Vibrant Graffiti Mural">Vibrant Graffiti Mural</option>
-                            <option value="Bauhaus Poster Design">Bauhaus Poster Design</option>
-                            <option value="Low-poly 3D render with pastel colors">Low-poly 3D render</option>
-                            <option value="Dark Fantasy Illustration (by Frank Frazetta)">Dark Fantasy Illustration</option>
-                            <option value="Suminagashi (Japanese floating ink)">Suminagashi (Japanese floating ink)</option>
-                            <option value="Detailed Medieval Illuminated Manuscript">Illuminated Manuscript</option>
-                            <option value="1980s VHS Glitch Art">1980s VHS Glitch Art</option>
-                            <option value="Minimalist Vector Art">Minimalist Vector Art</option>
-                            <option value="Cubist Painting (Geometric Forms)">Cubist Painting</option>
+                            <option value="Ukiyo-e Woodblock Print">Ukiyo-e Woodblock Print</option>
+                            <option value="Low-Poly 3D Render (Retro aesthetic)">Low-Poly 3D Render (Retro aesthetic)</option>
+                            <option value="Watercolor Painting (Soft, diffused edges)">Watercolor Painting (Soft, diffused edges)</option>
+                            <option value="Art Nouveau (Curving, organic lines)">Art Nouveau (Curving, organic lines)</option>
+                            <option value="Pixel Art (16-bit retro style)">Pixel Art (16-bit retro style)</option>
+                            <option value="Sculptural Claymation (Tactile texture)">Sculptural Claymation (Tactile texture)</option>
+                            <option value="Cubism (Geometric forms and fragmented reality)">Cubism (Geometric forms and fragmented reality)</option>
+                            <option value="Expressionism (Distorted reality for emotional effect)">Expressionism (Distorted reality for emotional effect)</option>
+                            <option value="Modernism (Clean lines, focus on function)">Modernism (Clean lines, focus on function)</option>
+                            <option value="Bauhaus Poster Design (Bold geometry, primary colors)">Bauhaus Poster Design (Bold geometry, primary colors)</option>
+                            <option value="Surrealist Photography">Surrealist Photography</option>
                         </select>
-                        <input type="text" id="style-input" placeholder="... or type a custom style (e.g., Watercolor, Claymation)" class="w-full mt-2 p-3 rounded-lg text-sm">
-                        
-                        <!-- Style Mixer -->
-                        <label for="style-mixer-input" class="block text-sm font-medium text-gray-400 mt-4">Style Mixer (Optional)</label>
-                        <p class="text-xs text-gray-500 mb-1">Add a secondary style or artist to blend with your primary selection (e.g., "Art Nouveau" or "by Gustave Doré").</p>
-                        <input type="text" id="style-mixer-input" placeholder="Type secondary style here" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="style-custom" placeholder="... or type your own style/medium here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
-                    
-                    <!-- 5. Camera Angle/Composition -->
-                    <div id="field-angle">
-                        <label for="angle-input" class="block text-sm font-medium text-gray-300">5. Camera Angle/Composition</label>
-                        <p class="text-xs text-gray-500 mb-1">How is the scene framed? (Highly Recommended)</p>
-                        <select id="angle-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Angle —</option>
-                            <option value="Wide Shot (showing the full environment)">Wide Shot</option>
-                            <option value="Close-Up (focusing on the face)">Close-Up</option>
-                            <option value="Dutch Angle (tilted for unease)">Dutch Angle</option>
-                            <option value="Low-Angle Shot (making the subject appear powerful)">Low-Angle Shot</option>
-                            <option value="Aerial View (top-down)">Aerial View</option>
-                            <option value="Tracking Shot (following the subject)">Tracking Shot</option>
-                            <option value="Extreme Close-Up (focus on one detail)">Extreme Close-Up</option>
-                            <option value="Worm's-Eye View (looking up from the ground)">Worm's-Eye View</option>
-                            <option value="Symmetry Composition (perfectly balanced shot)">Symmetry Composition</option>
-                            <option value="Over-the-Shoulder Shot">Over-the-Shoulder Shot</option>
-                            <option value="Medium Shot (waist up)">Medium Shot</option>
-                            <option value="Panoramic View">Panoramic View</option>
-                            <option value="Shallow Depth of Field (focused subject, blurred background)">Shallow Depth of Field</option>
-                            <option value="Rule of Thirds Composition">Rule of Thirds Composition</option>
+
+                    <!-- 4A. Comic Book/Publisher Style -->
+                    <div>
+                        <label for="comic_style" class="block text-xl font-medium mb-1 text-gray-200">4A. Comic Book/Publisher Style (Optional)</label>
+                        <p class="text-gray-400 text-sm mb-2">Refine the art using the aesthetic of a specific publisher.</p>
+                        <select id="comic_style" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Comic Style/Publisher —</option>
+                            <option value="in the style of Marvel Comics">Marvel Comics</option>
+                            <option value="in the style of DC Comics">DC Comics</option>
+                            <option value="in the style of Image Comics">Image Comics</option>
+                            <option value="in the style of Dark Horse Comics">Dark Horse Comics</option>
+                            <option value="in the style of IDW Publishing">IDW Publishing</option>
+                            <option value="in the style of Dynamite Entertainment">Dynamite Entertainment</option>
+                            <option value="in the style of Valiant Comics">Valiant Comics</option>
+                            <option value="in the style of BOOM! Studios">BOOM! Studios</option>
+                            <option value="in the style of Archie Comics">Archie Comics</option>
+                            <option value="in the style of Titan Comics">Titan Comics</option>
+                            <option value="in the style of Oni Press">Oni Press</option>
+                            <option value="in the style of Fantagraphics">Fantagraphics</option>
+                            <option value="in the style of Vertical Comics">Vertical Comics</option>
+                            <option value="in the style of Kodansha Comics">Kodansha Comics</option>
+                            <option value="in the style of Viz Media">Viz Media</option>
+                            <option value="in the style of CrossGen">CrossGen</option>
+                            <option value="in the style of Mad Cave Studios">Mad Cave Studios</option>
+                            <option value="in the style of AfterShock Comics">AfterShock Comics</option>
+                            <option value="in the style of Humanoids">Humanoids</option>
+                            <option value="in the style of Scout Comics">Scout Comics</option>
                         </select>
-                        <input type="text" id="angle-input" placeholder="... or type a custom angle (e.g., Medium Shot, POV)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    </div>
+
+                    <!-- 4B. Style Mixer/Artist -->
+                    <div>
+                        <label for="artist" class="block text-xl font-medium mb-1 text-gray-200">4B. Style Mixer/Aesthetic (Optional)</label>
+                        <p class="text-gray-400 text-sm mb-2">Blend with the style of a master artist or a modern digital aesthetic (e.g., AFROPUNK, Lo-Fi).</p>
+                        <select id="artist" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select an Artist or Aesthetic —</option>
+                            <!-- Artists -->
+                            <option value="in the style of Leonardo da Vinci">Leonardo da Vinci</option>
+                            <option value="in the style of Michelangelo">Michelangelo</option>
+                            <option value="in the style of Raphael">Raphael</option>
+                            <option value="in the style of Vincent van Gogh">Vincent van Gogh</option>
+                            <option value="in the style of Sandro Botticelli">Sandro Botticelli</option>
+                            <option value="in the style of Jan van Eyck">Jan van Eyck</option>
+                            <option value="in the style of Claude Monet">Claude Monet</option>
+                            <option value="in the style of Paul Cezanne">Paul Cezanne</option>
+                            <option value="in the style of Gustav Klimt">Gustav Klimt</option>
+                            <option value="in the style of Salvador Dali">Salvador Dali</option>
+                            <option value="in the style of Pablo Picasso">Pablo Picasso</option>
+                            <option value="in the style of Andy Warhol">Andy Warhol</option>
+                            <option value="in the style of Bob Ross">Bob Ross</option>
+                            <option value="in the style of Henri Matisse">Henri Matisse</option>
+                            <option value="in the style of Frida Kahlo">Frida Kahlo</option>
+                            <option value="in the style of Jackson Pollock">Jackson Pollock</option>
+                            <option value="in the style of Rene Magritte">Rene Magritte</option>
+                            <option value="in the style of Wassily Kandinsky">Wassily Kandinsky</option>
+                            <!-- Aesthetics -->
+                            <option value="with an AFROPUNK aesthetic">AFROPUNK</option>
+                            <option value="with a Cyberpop aesthetic">Cyberpop</option>
+                            <option value="with a Clowncore aesthetic">Clowncore</option>
+                            <option value="with a Constructivism aesthetic">Constructivism</option>
+                            <option value="with a Country aesthetic">Country</option>
+                            <option value="with a Cyber Fairy Grunge aesthetic">Cyber Fairy Grunge</option>
+                            <option value="with a Cyberdellic aesthetic">Cyberdellic</option>
+                            <option value="with a Cybergoth aesthetic">Cybergoth</option>
+                            <option value="with a Cybergrunge aesthetic">Cybergrunge</option>
+                            <option value="with a Cyberpunk aesthetic">Cyberpunk</option>
+                            <option value="with a City Pop aesthetic">City Pop</option>
+                            <option value="with an Earthcore aesthetic">Earthcore</option>
+                            <option value="with an Electro Swing aesthetic">Electro Swing</option>
+                            <option value="with an Electropop aesthetic">Electropop</option>
+                            <option value="with an Emo aesthetic">Emo</option>
+                            <option value="with an Ethereal aesthetic">Ethereal</option>
+                            <option value="with a Kawaii aesthetic">Kawaii</option>
+                            <option value="with a Lightning Wave aesthetic">Lightning Wave</option>
+                            <option value="with a Lo-Fi aesthetic">Lo-Fi</option>
+                            <option value="with a LoveCore aesthetic">LoveCore</option>
+                            <option value="with a LunarPunk aesthetic">LunarPunk</option>
+                            <option value="with a Mad Scientist aesthetic">Mad Scientist</option>
+                            <option value="with a Maximalism aesthetic">Maximalism</option>
+                            <option value="with a Medieval aesthetic">Medieval</option>
+                            <option value="with a Metalcore aesthetic">Metalcore</option>
+                            <option value="with a Miami aesthetic">Miami</option>
+                            <option value="with a Midwest Emo aesthetic">Midwest Emo</option>
+                            <option value="with a Minimalism aesthetic">Minimalism</option>
+                            <option value="with a Moderism aesthetic">Modernism</option>
+                            <option value="with an Ocean Grunge aesthetic">Ocean Grunge</option>
+                            <option value="with an Instagram Model aesthetic">Instagram Model</option>
+                            <option value="with an Acid Pixie aesthetic">Acid Pixie</option>
+                            <option value="with an Acid Wave aesthetic">Acid Wave</option>
+                            <option value="with an Adventure Core aesthetic">Adventure Core</option>
+                            <option value="with an Ancient Egypt aesthetic">Ancient Egypt</option>
+                            <option value="with an Antique Grunge aesthetic">Antique Grunge</option>
+                        </select>
+                        <input type="text" id="artist-custom" placeholder="... or type your own artist/aesthetic here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
+                    </div>
+
+
+                    <!-- 5. Camera Angle/Composition -->
+                    <div>
+                        <label for="camera_angle" class="block text-xl font-medium mb-1 text-gray-200">5. Camera Angle/Composition <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">How is the scene framed?</p>
+                        <select id="camera_angle" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Camera Angle/Composition —</option>
+                            <option value="Wide Shot">Wide Shot (Showing the full environment)</option>
+                            <option value="Close-Up">Close-Up (Focusing on the face or detail)</option>
+                            <option value="Dutch Angle">Dutch Angle (Tilted for unease or dynamism)</option>
+                            <option value="Low-Angle Shot">Low-Angle Shot (Making the subject appear powerful)</option>
+                            <option value="Aerial View (Top-down)">Aerial View (Top-down, drone perspective)</option>
+                            <option value="Extreme Close-up">Extreme Close-up (Focusing intensely on one small feature)</option>
+                            <option value="Medium Shot">Medium Shot (Subject from the waist up)</option>
+                            <option value="Over the Shoulder">Over the Shoulder (Framed from behind another character)</option>
+                            <option value="Rule of Thirds Composition">Rule of Thirds Composition (Balanced framing)</option>
+                            <option value="Symmetry Composition">Symmetry Composition (Mirror-like balance)</option>
+                            <option value="Worm's-Eye View">Worm's-Eye View (Looking up from the ground)</option>
+                            <option value="High Angle Shot">High Angle Shot (Looking down, making subject seem vulnerable)</option>
+                            <option value="Eye-Level Shot">Eye-Level Shot (Standard, neutral perspective)</option>
+                            <option value="Hip Level Shot">Hip Level Shot</option>
+                            <option value="Knee Level Shot">Knee Level Shot</option>
+                            <option value="Ground Level Shot">Ground Level Shot</option>
+                            <option value="Shoulder-Level Shot">Shoulder-Level Shot</option>
+                            <option value="Oblique Angle">Oblique Angle</option>
+                            <option value="Three-Quarter View">Three-Quarter View</option>
+                            <option value="Front View">Front View</option>
+                            <option value="Rear View">Rear View</option>
+                            <option value="Side View">Side View</option>
+                            <option value="Underwater View">Underwater View</option>
+                            <option value="Panoramic View">Panoramic View</option>
+                            <option value="Wide-Angle View">Wide-Angle View</option>
+                            <option value="Zoom View">Zoom View</option>
+                        </select>
+                        <input type="text" id="camera_angle-custom" placeholder="... or type your own angle/composition here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
                     <!-- 6. Lighting/Ambiance -->
-                    <div id="field-lighting">
-                        <label for="lighting-input" class="block text-sm font-medium text-gray-300 required-star">6. Lighting/Ambiance</label>
-                        <p class="text-xs text-gray-500 mb-1">How does the light look, and what is the overall mood of the light?</p>
-                        <select id="lighting-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Lighting —</option>
-                            <option value="Volumetric Lighting (dramatic light shafts)">Volumetric Lighting (God Rays)</option>
-                            <option value="Rim Lighting (bright outline on the subject)">Rim Lighting (Bright Outline)</option>
-                            <option value="Warm Golden Hour">Warm Golden Hour</option>
-                            <option value="Cool Blue Moonlight">Cool Blue Moonlight</option>
-                            <option value="Harsh Fluorescent Light">Harsh Fluorescent Light</option>
-                            <option value="Soft, Diffused Lighting">Soft, Diffused Lighting</option>
-                            <option value="Cinematic Backlighting">Cinematic Backlighting</option>
-                            <option value="High-Key (bright and minimal shadows)">High-Key Lighting</option>
-                            <option value="Chiaroscuro (extreme contrast)">Chiaroscuro (Extreme Contrast)</option>
-                            <option value="Caustic light reflections (water effects)">Caustic Light</option>
-                            <option value="Spotlight on subject (Dramatic)">Spotlight on Subject</option>
-                            <option value="Edison Bulb Warmth">Edison Bulb Warmth</option>
-                            <option value="Neon Glow reflecting off wet surfaces">Neon Glow Reflection</option>
-                            <option value="Soft Box Studio Lighting">Soft Box Studio Lighting</option>
-                            <option value="Dusk, with deep cyan shadows">Dusk, with deep cyan shadows</option>
+                    <div>
+                        <label for="lighting" class="block text-xl font-medium mb-1 text-gray-200">6. Lighting/Ambiance <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">How does the light look, and what is the overall color tone?</p>
+                        <select id="lighting" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Lighting/Ambiance —</option>
+                            <option value="Volumetric Lighting (Dramatic light shafts)">Volumetric Lighting (Dramatic light shafts)</option>
+                            <option value="Rim Lighting (Bright outline on the subject)">Rim Lighting (Bright outline on the subject)</option>
+                            <option value="Warm Golden Hour">Warm Golden Hour (Soft, low, golden sunlight)</option>
+                            <option value="Cool Blue Moonlight">Cool Blue Moonlight (High contrast, cold tones)</option>
+                            <option value="Harsh Fluorescent Light">Harsh Fluorescent Light (Washed-out, clinical feel)</option>
+                            <option value="Soft, Diffused Lighting">Soft, Diffused Lighting (No harsh shadows, gentle look)</option>
+                            <option value="Backlighting (Subject is silhouetted)">Backlighting (Subject is silhouetted)</option>
+                            <option value="Cinematic Lighting (High-key, studio setup)">Cinematic Lighting (High-key, studio setup)</option>
+                            <option value="Neon Glow">Neon Glow (Vibrant, colorful reflections)</option>
+                            <option value="God Rays (Light breaking through clouds or canopy)">God Rays (Light breaking through clouds or canopy)</option>
+                            <option value="Caustic Light (Light reflected through water)">Caustic Light (Light reflected through water)</option>
+                            <option value="Chiaroscuro (Dramatic contrast of light and dark)">Chiaroscuro (Dramatic contrast of light and dark)</option>
+                            <option value="Lens Flare">Lens Flare (Optical effect from bright light source)</option>
+                            <option value="Spotlight">Spotlight (Focused beam of light)</option>
+                            <option value="Moody, Low-Key Lighting">Moody, Low-Key Lighting (Mostly shadows, dark ambiance)</option>
                         </select>
-                        <input type="text" id="lighting-input" placeholder="... or type custom lighting (e.g., Studio Softbox Lighting)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="lighting-custom" placeholder="... or type your own lighting/ambiance here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
                     <!-- 7. Mood/Atmosphere -->
-                    <div id="field-mood">
-                        <label for="mood-input" class="block text-sm font-medium text-gray-300 required-star">7. Mood/Atmosphere</label>
-                        <p class="text-xs text-gray-500 mb-1">What feeling should the final output evoke?</p>
-                        <select id="mood-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select a Suggested Mood —</option>
+                    <div>
+                        <label for="mood" class="block text-xl font-medium mb-1 text-gray-200">7. Mood/Atmosphere <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">What feeling should the final output evoke?</p>
+                        <select id="mood" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Mood/Atmosphere —</option>
                             <option value="Eerie and Suspenseful">Eerie and Suspenseful</option>
                             <option value="Calm and Reflective">Calm and Reflective</option>
                             <option value="Joyful and Energetic">Joyful and Energetic</option>
                             <option value="Epic and Grandiose">Epic and Grandiose</option>
                             <option value="Melancholic and Solemn">Melancholic and Solemn</option>
-                            <option value="Tense and Anxious">Tense and Anxious</option>
-                            <option value="Whimsical and Playful">Whimsical and Playful</option>
-                            <option value="Ominous and Silent">Ominous and Silent</option>
                             <option value="Nostalgic and Warm">Nostalgic and Warm</option>
+                            <option value="Ominous and Silent">Ominous and Silent</option>
+                            <option value="Whimsical and Playful">Whimsical and Playful</option>
+                            <option value="Tense and Frantic">Tense and Frantic</option>
+                            <option value="Peaceful and Serene">Peaceful and Serene</option>
+                            <option value="Mysterious and Intricate">Mysterious and Intricate</option>
+                            <option value="Vibrant and Electric">Vibrant and Electric</option>
+                            <option value="Dark and Brooding">Dark and Brooding</option>
+                            <option value="Awe-Inspiring and Vast">Awe-Inspiring and Vast</option>
                             <option value="Dreamlike and Surreal">Dreamlike and Surreal</option>
-                            <option value="Frantic and Chaotic">Frantic and Chaotic</option>
-                            <option value="Mysterious and Cryptic">Mysterious and Cryptic</option>
-                            <option value="Hopeful and Serene">Hopeful and Serene</option>
                         </select>
-                        <input type="text" id="mood-input" placeholder="... or type a custom mood (e.g., Tense and Anxious)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="mood-custom" placeholder="... or type your own mood/atmosphere here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
                     <!-- 8. Aspect Ratio/Format -->
-                    <div id="field-aspect-ratio">
-                        <label for="aspect-ratio-input" class="block text-sm font-medium text-gray-300 required-star">8. Aspect Ratio/Format</label>
-                        <p class="text-xs text-gray-500 mb-1">Choose the final image shape (critical for generation).</p>
-                        <select id="aspect-ratio-select" class="w-full mt-1 p-3 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                            <option value="" disabled selected>— Select Aspect Ratio —</option>
-                            <option value="aspect ratio 16:9 (Cinematic)">16:9 (Landscape/Video)</option>
-                            <option value="aspect ratio 1:1 (Square)">1:1 (Square/Social)</option>
-                            <option value="aspect ratio 4:3 (Classic)">4:3 (Standard Photo)</option>
-                            <option value="aspect ratio 9:16 (Vertical/Mobile)">9:16 (Portrait/Mobile)</option>
-                            <option value="aspect ratio 21:9 (Ultrawide)">21:9 (Ultrawide Cinema)</option>
-                            <option value="aspect ratio 3:2 (Print Photography)">3:2 (Print Photography)</option>
+                    <div>
+                        <label for="aspect_ratio" class="block text-xl font-medium mb-1 text-gray-200">8. Aspect Ratio/Format <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">Select the desired screen ratio for the final output.</p>
+                        <select id="aspect_ratio" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select an Aspect Ratio —</option>
+                            <option value="16:9 cinematic aspect ratio">16:9 (Standard Widescreen / Video)</option>
+                            <option value="4:3 aspect ratio">4:3 (Classic TV / Retro)</option>
+                            <option value="21:9 anamorphic aspect ratio">21:9 (Ultra Widescreen / Super Cinematic)</option>
+                            <option value="1:1 square aspect ratio">1:1 (Square / Social Media)</option>
+                            <option value="9:16 vertical aspect ratio">9:16 (Vertical / Mobile Story)</option>
+                            <option value="3:2 aspect ratio">3:2 (Standard Photography)</option>
+                            <option value="5:4 aspect ratio">5:4 (Medium Format Photography)</option>
                         </select>
-                        <input type="text" id="aspect-ratio-input" placeholder="... or type a custom ratio (e.g., 5:4)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="aspect_ratio-custom" placeholder="... or type your own aspect ratio here (e.g., 2:3)" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
-                    
-                    <!-- 9. Camera Movement -->
-                    <div id="field-camera-movement">
-                        <label for="camera-movement-input" class="block text-sm font-medium text-gray-300 required-star">9. Camera Movement (Cinematic Control)</label>
-                        <p class="text-xs text-gray-500 mb-1" id="camera-movement-note">Specify the camera's action. (Required for Scene/Video)</p>
-                        <select id="camera-movement-select" class="w-full mt-1 p-3 rounded-lg focus:ring-sky-500 focus:border-sky-500 text-sm">
-                            <option value="" disabled selected>— Select Camera Movement —</option>
+
+                    <!-- 9. Camera Movement (REQUIRED for Scene/Video) -->
+                    <div id="camera-movement-group" class="hidden">
+                        <label for="camera_movement" class="block text-xl font-medium mb-1 text-gray-200">9. Camera Movement <span class="text-red-400">*</span></label>
+                        <p class="text-gray-400 text-sm mb-2">Specify the camera's motion path. (REQUIRED for Scene/Video)</p>
+                        <select id="camera_movement" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+4xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%22%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Camera Movement —</option>
                             <option value="Dolly Zoom (Vertigo Effect)">Dolly Zoom (Vertigo Effect)</option>
-                            <option value="Smooth tracking shot, following the subject">Smooth Tracking Shot</option>
-                            <option value="Orbit shot, circling the subject">Orbit Shot (Circling the subject)</option>
-                            <option value="Handheld shaky POV">Handheld POV (Shaky, immediate feel)</option>
-                            <option value="Static pan left/right">Static Pan Left/Right</option>
-                            <option value="Jib crane descending">Jib Crane Descending</option>
-                            <option value="Rack focus transition">Rack Focus Transition</option>
-                            <option value="Smooth Steadicam shot">Smooth Steadicam Shot</option>
-                            <option value="Tilt up to reveal the subject">Tilt Up to Reveal</option>
-                            <option value="Slow zoom in, creating tension">Slow Zoom In</option>
-                            <option value="360-degree rotation around the scene">360-Degree Rotation</option>
-                            <option value="Hyper-lapse over a busy street">Hyper-lapse over a busy street</option>
-                            <option value="Fast reverse dolly shot">Fast Reverse Dolly</option>
+                            <option value="Tracking Shot (Smoothly following the subject)">Tracking Shot (Smoothly following the subject)</option>
+                            <option value="Orbit Shot (Circling the subject)">Orbit Shot (Circling the subject)</option>
+                            <option value="Handheld POV (Shaky, immediate feel)">Handheld POV (Shaky, immediate feel)</option>
+                            <option value="Pan Left/Right (Static pivot)">Pan Left/Right (Static pivot)</option>
+                            <option value="Tilt Up/Down (Static pivot)">Tilt Up/Down (Static pivot)</option>
+                            <option value="Smooth Steadicam Shot">Smooth Steadicam Shot</option>
+                            <option value="Jib Crane Descending">Jib Crane Descending</option>
+                            <option value="Rack Focus (Changing focus depth)">Rack Focus (Changing focus depth)</option>
+                            <option value="Time-lapse View">Time-lapse View (Compressed time)</option>
+                            <option value="Whip Pan (Fast horizontal blur)">Whip Pan (Fast horizontal blur)</option>
+                            <option value="Spiral Crane Shot">Spiral Crane Shot (Moving up and around)</option>
+                            <option value="Boom Shot (Moving vertically)">Boom Shot (Moving vertically)</option>
+                            <option value="Reverse Dolly (Moving away from the subject)">Reverse Dolly (Moving away from the subject)</option>
+                            <option value="Push-In (Slowly moving towards the subject)">Push-In (Slowly moving towards the subject)</option>
+                            <option value="Static, locked-down camera">Static, locked-down camera (No movement)</option>
                         </select>
-                        <input type="text" id="camera-movement-input" placeholder="... or type a custom movement (e.g., Crane shot ascending)" class="w-full mt-2 p-3 rounded-lg text-sm">
+                        <input type="text" id="camera_movement-custom" placeholder="... or type your own camera movement here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
                     
                     <!-- 10. Technical Modifiers -->
-                    <div id="field-technical-modifiers">
-                        <label for="technical-modifiers-input" class="block text-sm font-medium text-gray-300">10. Technical Modifiers (Optional)</label>
-                        <p class="text-xs text-gray-500 mb-1">Add specific high-impact keywords for rendering and quality (e.g., ZBrush, Subsurface Scattering, UE5).</p>
-                        <input type="text" id="technical-modifiers-input" placeholder="e.g., Octane render, 16k, depth of field, tilt-shift lens" class="w-full mt-2 p-3 rounded-lg text-sm">
+                    <div>
+                        <label for="technical" class="block text-xl font-medium mb-1 text-gray-200">10. Technical Modifiers (Optional)</label>
+                        <p class="text-gray-400 text-sm mb-2">Add high-impact keywords for rendering quality or effects.</p>
+                        <select id="technical" class="w-full p-3 border rounded-lg shadow-inner focus:ring focus:ring-indigo-500 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M10%2014l-4-4h8l-4%204z%22%20fill%3D%236366F1%22%2F%3E%3C%2Fsvg%3E')]">
+                            <option value="">— Select a Technical Modifier —</option>
+                            <option value="Unreal Engine 5 Render">Unreal Engine 5 Render</option>
+                            <option value="Octane Render">Octane Render</option>
+                            <option value="ZBrush Sculpt">ZBrush Sculpt (Digital sculpting look)</option>
+                            <option value="Subsurface Scattering">Subsurface Scattering (Realistic light under skin/wax)</option>
+                            <option value="Chromatic Aberration">Chromatic Aberration (Color fringing effect)</option>
+                            <option value="Depth of Field">Depth of Field (Blurry background, sharp foreground)</option>
+                            <option value="Hyper-realistic texture detail">Hyper-realistic texture detail</option>
+                            <option value="8K photorealistic">8K photorealistic (Extreme resolution)</option>
+                            <option value="Cinematic film grain">Cinematic film grain</option>
+                            <option value="Detailed matte painting">Detailed matte painting</option>
+                            <option value="Photobashing technique">Photobashing technique</option>
+                            <option value="Highly detailed environment design">Highly detailed environment design</option>
+                            <option value="High contrast ratios">High contrast ratios</option>
+                            <option value="Negative Space Composition">Negative Space Composition (Minimalist)</option>
+                            <option value="Concept design sketch">Concept design sketch</option>
+                        </select>
+                        <input type="text" id="technical-custom" placeholder="... or type your own technical modifier here" class="mt-2 w-full p-3 border rounded-lg shadow-inner">
                     </div>
 
 
                     <div class="mt-8">
-                        <button onclick="generatePrompt()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
-                            Generate Final Prompt
+                        <p id="error-message" class="error-message text-center mb-4 hidden"></p>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-extrabold py-4 px-6 rounded-lg shadow-lg transition duration-200 text-xl">
+                            ✨ Generate Final Prompt
                         </button>
                     </div>
 
-                </div>
-            </div>
+                </form>
+            </section>
 
-            <!-- Step 3: Result Display -->
-            <div id="step3" class="hidden">
-                <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-3">Step 3: Final Generative Prompt</h2>
-                <div id="confirmation-list" class="mb-6 p-4 rounded-lg bg-gray-800 text-sm text-gray-300 space-y-2">
-                    <!-- Selections will be injected here -->
-                </div>
-                
-                <h3 class="text-lg font-medium text-indigo-400 mb-2">Synthesized Prompt:</h3>
-                <textarea id="final-prompt-output" rows="6" readonly class="w-full p-3 rounded-lg border-2 border-indigo-500 text-base text-white resize-none"></textarea>
+            <hr class="border-t border-indigo-500/30 my-8">
 
-                <button onclick="copyToClipboard('final-prompt-output')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg mt-4 transition duration-200">
-                    Copy Prompt to Clipboard
-                </button>
-                <p id="copy-message" class="text-center mt-2 text-sm text-green-400 opacity-0 transition duration-300">Copied!</p>
-                
-                <hr class="my-6 border-gray-700">
+            <!-- Step 3: Synthesis and Output -->
+            <section id="step-3" class="hidden">
+                <h2 class="text-2xl font-bold mb-4 text-indigo-400">Step 3: Review and Output</h2>
 
-                <!-- Manual Refinement Tip (Replaces LLM features) -->
-                <div class="p-4 bg-gray-800 rounded-lg">
-                    <h4 class="text-lg font-medium text-emerald-400 mb-2">Manual Enhancement & Negative Prompt Tips</h4>
-                    <p class="text-sm text-gray-400 mb-4">
-                        To achieve professional-grade results, **copy your synthesized prompt above** and manually append keywords from these categories.
-                    </p>
-                    
-                    <div class="space-y-4">
-                        <!-- Positive Enhancement -->
-                        <div>
-                            <p class="text-base font-semibold text-white mb-1">🚀 Quality & Detail (Positive)</p>
-                            <p class="text-xs text-gray-400 leading-relaxed break-words">
-                                **Masterpiece, Trending on ArtStation, ZBrush sculpt, Hyper-detailed, Cinematic, 8k, Octane render, Unreal Engine 5, Subsurface scattering, Volumetric lighting, Anamorphic lens flare, Golden ratio composition.**
-                            </p>
-                        </div>
-                        
-                        <!-- Technical Modifiers -->
-                        <div>
-                            <p class="text-base font-semibold text-white mb-1">⚙️ Rendering & Finish (Technical)</p>
-                            <p class="text-xs text-gray-400 leading-relaxed break-words">
-                                **V-ray, Arnold Render, Cycles Render, Ray tracing, Global illumination, Depth of field, Tilt-shift, Fisheye lens, Chromatic aberration, HDR, Detailed skin, Rim light, High key, Low key, Backlit.**
-                            </p>
-                        </div>
-
-                        <!-- Negative Prompt (Exclusions) -->
-                        <div>
-                            <p class="text-base font-semibold text-white mb-1">🚫 Negative Prompt (Exclusions)</p>
-                            <p class="text-xs text-gray-400 leading-relaxed break-words">
-                                **Low quality, Blurry, Malformed, Deformed, Bad anatomy, Worst quality, Noise, Artifacts, Watermark, Text, Signature, Amateur, Cartoon, Simple drawing, Extra limbs, Cropped.**
-                            </p>
-                            <p class="text-xs text-red-400 mt-1">
-                                *Tip: Copy this entire list and paste it into the dedicated "Negative Prompt" field of your generator.*
-                            </p>
-                        </div>
+                <div class="bg-indigo-900/20 p-4 rounded-lg mb-6 border border-indigo-600/50">
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-300">Your Synthesized Prompt (Base)</h3>
+                    <textarea id="synthesized-prompt" class="w-full h-32 p-3 text-lg font-mono rounded-lg border bg-gray-900 text-white" readonly></textarea>
+                    <div class="flex flex-col sm:flex-row justify-between items-center mt-3">
+                        <p id="copy-message-synth" class="confirmation-message text-green-400 font-medium"></p>
+                        <button id="copy-button-synth" onclick="copyToClipboard('synthesized-prompt', 'copy-message-synth')" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 mt-2 sm:mt-0">
+                            Copy Base Prompt
+                        </button>
                     </div>
                 </div>
 
+                <!-- Manual Enhancement Tips -->
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-3 text-yellow-400">Manual Enhancement Tip (Recommended)</h3>
+                    <p class="text-gray-300 mb-4">To maximize quality, append high-impact **Quality Keywords** to your base prompt and include a **Negative Prompt** (exclusion list) in the model's settings.</p>
 
-                <button onclick="resetApp()" class="w-full text-gray-400 hover:text-white mt-6 text-sm">
-                    Start Over
-                </button>
-            </div>
-        </div>
-        <!-- Simple Message Box for non-alert communication -->
-        <div id="message-box" class="fixed top-5 right-5 p-4 rounded-lg shadow-lg bg-red-800 text-white hidden z-50"></div>
+                    <!-- POSITIVE KEYWORDS -->
+                    <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                        <h4 class="text-lg font-medium text-green-300 mb-2">✨ Quality & Detail Keywords (Add to Prompt End)</h4>
+                        <p class="text-sm font-mono text-gray-200">
+                            **Quality:** 8k photorealistic, hyperdetailed, cinematic, highly intricate detail, volumetric light, subsurface scattering, extreme texture detail, unreal engine 5 render, octane render, zbrush sculpt.
+                            <br><br>
+                            **Cinematic/Camera:** shallow depth of field, anamorphic lens flare, high contrast ratios, negative space composition, film noir, moody lighting, bokeh.
+                        </p>
+                    </div>
+                    
+                    <!-- NEGATIVE KEYWORDS -->
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h4 class="text-lg font-medium text-red-300 mb-2">🚫 Negative Prompt (Exclusion List)</h4>
+                        <p class="text-sm font-mono text-gray-200">
+                            **General:** low quality, worst quality, blurry, fuzzy, noise, cropped, distorted, bad anatomy, deformed, mutated, tiling, jpeg artifacts, monochrome.
+                            <br><br>
+                            **Style/Error:** signature, watermark, logo, text, duplicate, flat color, border, drawing, cartoon, scribble.
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+        </main>
     </div>
 
     <script>
-        // --- State Management ---
-        let promptData = {
-            outputGoal: null,
-            subject: null,
-            action: null,
-            scenery: null,
-            style: null,
-            styleMixer: null,
-            cameraAngle: null, 
-            cameraMovement: null,
-            lighting: null,
-            mood: null,
-            aspectRatio: null,
-            technicalModifiers: null
-        };
+        // Store selected goal globally
+        let outputGoal = '';
 
-        // --- Utility Functions ---
-        function showMessage(text, duration = 3000, isError = false) {
-            const box = document.getElementById('message-box');
-            box.textContent = text;
-            box.className = `fixed top-5 right-5 p-3 rounded-lg shadow-lg ${isError ? 'bg-red-600' : 'bg-green-600'} text-white z-50 block`;
-            setTimeout(() => {
-                box.classList.add('hidden');
-            }, duration);
-        }
-
-        function copyToClipboard(elementId) {
-            const copyText = document.getElementById(elementId);
-            const textToCopy = copyText.value;
-            
-            const msg = document.getElementById('copy-message'); 
-
-            // 1. Attempt copy using modern Clipboard API
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    // Success path
-                    if (msg) {
-                        msg.textContent = 'Copied!';
-                        msg.classList.remove('opacity-0');
-                        msg.classList.add('opacity-100', 'text-green-400');
-                        setTimeout(() => {
-                            msg.classList.remove('opacity-100');
-                            msg.classList.add('opacity-0');
-                        }, 1500);
-                    }
-                }).catch(err => {
-                    // Fallback attempt
-                    console.warn("Clipboard API failed, attempting execCommand fallback:", err);
-                    attemptExecCommandCopy(copyText, msg);
-                });
-            } else {
-                // If navigator.clipboard is not available at all, fall back immediately
-                attemptExecCommandCopy(copyText, msg);
-            }
-        }
-        
-        function attemptExecCommandCopy(copyTextElement, msgElement) {
-             try {
-                // Fallback method using execCommand
-                copyTextElement.select(); 
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges(); // Deselect text
-                
-                // Show success message (for fallback)
-                if (msgElement) {
-                    msgElement.textContent = 'Copied!';
-                    msgElement.classList.remove('opacity-0');
-                    msgElement.classList.add('opacity-100', 'text-green-400');
-                    setTimeout(() => {
-                        msgElement.classList.remove('opacity-100');
-                        msgElement.classList.add('opacity-0');
-                    }, 1500);
-                }
-            } catch (execError) {
-                // Final failure
-                console.error('Final Copy Attempt Failed:', execError);
-                showMessage('Copying failed. Please copy manually.', 5000, true);
-            }
-        }
-
-
-        function getInputValue(selectId, inputId) {
-            const selectValue = document.getElementById(selectId)?.value;
-            const inputValue = document.getElementById(inputId)?.value.trim();
-            
-            if (inputValue) {
-                return inputValue; // Custom input overrides selection
-            }
-            if (selectValue) {
-                return selectValue; // Use selected value
-            }
-            return null;
-        }
-
-        // --- Step Transitions ---
-        function toggleRequiredStar(fieldId, isRequired) {
-            const star = document.querySelector(`#${fieldId} .required-star`);
-            if (star) {
-                if (isRequired) {
-                    star.classList.add('required-star');
-                } else {
-                    star.classList.remove('required-star');
-                }
-            }
-        }
+        // --- Core Functions ---
 
         function setGoal(goal) {
-            promptData.outputGoal = goal;
-            document.getElementById('goal-display').textContent = goal;
-            
-            // Toggle visibility and required status for motion-related fields
-            const isScene = goal === 'Scene/Video';
-            
-            // 2. Action/State
-            document.getElementById('action-note').textContent = isScene ? 
-                'What is the subject doing? (REQUIRED for Scene/Video)' : 
-                'What is the subject doing, or what is their pose? (Optional for Image)';
-            toggleRequiredStar('field-action', isScene);
+            outputGoal = goal;
+            document.getElementById('step-2-goal').textContent = goal;
 
-            // 9. Camera Movement
-            const cameraMovementField = document.getElementById('field-camera-movement');
-            const cameraMovementNote = document.getElementById('camera-movement-note');
+            // Highlight the selected button
+            document.getElementById('goal-image').classList.remove('bg-indigo-800', 'border-4', 'border-white');
+            document.getElementById('goal-scene').classList.remove('bg-indigo-800', 'border-4', 'border-white');
             
-            if (isScene) {
-                cameraMovementField.classList.remove('hidden');
-                cameraMovementNote.textContent = 'Specify the camera\'s action. (REQUIRED for Scene/Video)';
-                toggleRequiredStar('field-camera-movement', true);
-            } else {
-                // Ensure it's treated as optional/hidden for Image
-                cameraMovementField.classList.add('hidden');
-                toggleRequiredStar('field-camera-movement', false);
+            if (goal === 'Image') {
+                document.getElementById('goal-image').classList.add('bg-indigo-800', 'border-4', 'border-white');
+                document.getElementById('goal-scene').classList.remove('bg-indigo-800');
+                document.getElementById('action-instruction').textContent = 'What is the subject doing? (Optional for Image)';
+                document.getElementById('camera-movement-group').classList.add('hidden');
+                document.getElementById('action').required = false;
+            } else { // Scene/Video
+                document.getElementById('goal-scene').classList.add('bg-indigo-800', 'border-4', 'border-white');
+                document.getElementById('goal-image').classList.remove('bg-indigo-800');
+                document.getElementById('action-instruction').textContent = 'What is the subject doing? (REQUIRED for Scene/Video)';
+                document.getElementById('camera-movement-group').classList.remove('hidden');
+                document.getElementById('action').required = true;
             }
 
-            // Move to Step 2
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('goal-message').textContent = `Goal set: ${goal}. Please proceed to Step 2.`;
+            document.getElementById('goal-message').classList.remove('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+            document.getElementById('step-3').classList.add('hidden'); // Hide output if goal changes
+            document.getElementById('error-message').classList.add('hidden');
         }
 
-        function validateAndCollectData() {
-            promptData.subject = getInputValue('subject-select', 'subject-input');
-            promptData.action = getInputValue('action-select', 'action-input');
-            promptData.scenery = getInputValue('scenery-select', 'scenery-input');
-            promptData.style = getInputValue('style-select', 'style-input');
-            promptData.styleMixer = document.getElementById('style-mixer-input').value.trim() || null;
-            promptData.cameraAngle = getInputValue('angle-select', 'angle-input'); 
-            promptData.lighting = getInputValue('lighting-select', 'lighting-input');
-            promptData.mood = getInputValue('mood-select', 'mood-input');
-            promptData.aspectRatio = getInputValue('aspect-ratio-select', 'aspect-ratio-input');
-            promptData.cameraMovement = getInputValue('camera-movement-select', 'camera-movement-input');
-            promptData.technicalModifiers = document.getElementById('technical-modifiers-input').value.trim() || null;
+        function getInputValue(selectId, customId) {
+            const select = document.getElementById(selectId);
+            const custom = document.getElementById(customId);
 
+            if (custom && custom.value.trim() !== '') {
+                return custom.value.trim();
+            }
+            if (select && select.value.trim() !== '') {
+                return select.value.trim();
+            }
+            return '';
+        }
 
-            const requiredFields = [
-                { key: 'subject', name: 'Subject' },
-                { key: 'scenery', name: 'Scenery/Context' },
-                { key: 'style', name: 'Artistic Style' },
-                { key: 'lighting', name: 'Lighting/Ambiance' },
-                { key: 'mood', name: 'Mood/Atmosphere' },
-                { key: 'aspectRatio', name: 'Aspect Ratio' }
-            ];
+        function generatePrompt(event) {
+            event.preventDefault();
 
-            let missingFields = [];
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.classList.add('hidden');
+            
+            // Collect all parameter values
+            const params = {
+                subject: getInputValue('subject', 'subject-custom'),
+                action: getInputValue('action', 'action-custom'),
+                scenery: getInputValue('scenery', 'scenery-custom'),
+                style: getInputValue('style', 'style-custom'),
+                comic_style: getInputValue('comic_style', ''),
+                artist: getInputValue('artist', 'artist-custom'),
+                camera_angle: getInputValue('camera_angle', 'camera_angle-custom'),
+                lighting: getInputValue('lighting', 'lighting-custom'),
+                mood: getInputValue('mood', 'mood-custom'),
+                aspect_ratio: getInputValue('aspect_ratio', 'aspect_ratio-custom'),
+                camera_movement: getInputValue('camera_movement', 'camera_movement-custom')
+            };
 
-            // Check primary required fields
-            requiredFields.forEach(field => {
-                if (!promptData[field.key]) {
-                    missingFields.push(field.name);
+            // --- Validation ---
+            let requiredFields = ['subject', 'scenery', 'style', 'lighting', 'mood', 'aspect_ratio'];
+            if (outputGoal === 'Scene/Video') {
+                requiredFields.push('action', 'camera_movement');
+            }
+
+            for (const field of requiredFields) {
+                if (!params[field]) {
+                    errorMessage.textContent = `Error: The '${field}' field is required for a ${outputGoal} prompt.`;
+                    errorMessage.classList.remove('hidden');
+                    return;
                 }
-            });
-
-            // Check conditional fields (Scene/Video)
-            if (promptData.outputGoal === 'Scene/Video') {
-                if (!promptData.action) missingFields.push('Action/State');
-                if (!promptData.cameraMovement) missingFields.push('Camera Movement');
             }
 
-            if (missingFields.length > 0) {
-                showMessage(`Please fill in all required fields: ${missingFields.join(', ')}.`, 5000, true);
-                return false;
+            // --- Synthesis ---
+            let parts = [];
+
+            // 1. Composition/Angle
+            if (params.camera_angle) {
+                parts.push(params.camera_angle);
             }
 
-            return true;
-        }
+            // 2. Camera Movement (Video only)
+            if (outputGoal === 'Scene/Video' && params.camera_movement) {
+                parts.push(params.camera_movement);
+            }
+            
+            // 3. Subject, Action, and Context
+            const subjectActionContext = `${params.subject}, ${params.action} in a ${params.scenery} setting.`;
+            parts.push(subjectActionContext);
 
-        function generatePrompt() {
-            if (!validateAndCollectData()) {
-                return;
+            // 4. Lighting, Mood, Style
+            let aestheticParts = [];
+            
+            // Lighting and Mood
+            aestheticParts.push(`The scene is illuminated with ${params.lighting} to create a ${params.mood} feel.`);
+
+            // Primary Style
+            aestheticParts.push(params.style);
+
+            // Comic Style
+            if (params.comic_style) {
+                 aestheticParts.push(params.comic_style);
+            }
+            
+            // Artist/Aesthetic Mixer
+            if (params.artist) {
+                aestheticParts.push(params.artist);
             }
 
-            // Build Components
-            const composition = promptData.cameraAngle || 'detailed shot';
-            const movement = promptData.cameraMovement ? `, ${promptData.cameraMovement}` : '';
-            const actionPhrase = promptData.action ? `, ${promptData.action}` : '';
-            const styleBlender = promptData.styleMixer ? ` mixed with ${promptData.styleMixer}` : '';
-            const technical = promptData.technicalModifiers ? `, ${promptData.technicalModifiers}` : '';
-            
-            // Construct the prompt string
-            const finalPrompt = 
-                `${composition}${movement} of ${promptData.subject}${actionPhrase} in a ${promptData.scenery} setting. ` +
-                `The scene is illuminated with ${promptData.lighting} to create a ${promptData.mood} feel. ` +
-                `${promptData.style}${styleBlender}${technical}, ${promptData.aspectRatio}.`;
+            parts.push(aestheticParts.join(', '));
 
-            document.getElementById('final-prompt-output').value = finalPrompt;
-            
-            // Update confirmation list
-            const list = document.getElementById('confirmation-list');
-            list.innerHTML = `
-                <p><span class="font-bold text-gray-200">Goal:</span> ${promptData.outputGoal}</p>
-                <p><span class="font-bold text-gray-200">1. Subject:</span> ${promptData.subject}</p>
-                <p><span class="font-bold text-gray-200">2. Action:</span> ${promptData.action || 'N/A (Static Image)'}</p>
-                <p><span class="font-bold text-gray-200">3. Scenery:</span> ${promptData.scenery}</p>
-                <p><span class="font-bold text-gray-200">4. Style:</span> ${promptData.style} ${promptData.styleMixer ? `(Blended with: ${promptData.styleMixer})` : ''}</p>
-                <p><span class="font-bold text-gray-200">5. Angle:</span> ${promptData.cameraAngle || 'Default Composition'}</p>
-                <p><span class="font-bold text-gray-200">6. Lighting:</span> ${promptData.lighting}</p>
-                <p><span class="font-bold text-gray-200">7. Mood:</span> ${promptData.mood}</p>
-                <p><span class="font-bold text-gray-200">8. Ratio:</span> ${promptData.aspectRatio}</p>
-                <p><span class="font-bold text-gray-200">9. Movement:</span> ${promptData.cameraMovement || 'N/A (Static Image)'}</p>
-                <p><span class="font-bold text-gray-200">10. Tech Mods:</span> ${promptData.technicalModifiers || 'N/A'}</p>
-            `;
+            // 5. Technical and Aspect Ratio (always last)
+            let finalKeywords = [];
+            if (params.technical) {
+                finalKeywords.push(params.technical);
+            }
+            finalKeywords.push(params.aspect_ratio);
 
-            // Move to Step 3
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.remove('hidden');
+            parts.push(finalKeywords.join(', '));
+            
+            // Final prompt assembly
+            const finalPrompt = parts.filter(p => p.trim() !== '').join(' ');
+
+            // Display result
+            document.getElementById('synthesized-prompt').value = finalPrompt.trim();
+            document.getElementById('step-3').classList.remove('hidden');
+            window.scrollTo(0, document.body.scrollHeight); // Scroll to output
         }
 
-
-        function resetApp() {
-            // Reset state
-            promptData = { outputGoal: null, subject: null, action: null, scenery: null, style: null, styleMixer: null, cameraAngle: null, cameraMovement: null, lighting: null, mood: null, aspectRatio: null, technicalModifiers: null };
+        async function copyToClipboard(elementId, msgId) {
+            const textToCopy = document.getElementById(elementId).value;
+            const msgElement = document.getElementById(msgId);
             
-            // Reset form inputs
-            document.getElementById('subject-select').value = '';
-            document.getElementById('subject-input').value = '';
-            document.getElementById('action-select').value = '';
-            document.getElementById('action-input').value = '';
-            document.getElementById('scenery-select').value = '';
-            document.getElementById('scenery-input').value = '';
-            document.getElementById('style-select').value = '';
-            document.getElementById('style-input').value = '';
-            document.getElementById('style-mixer-input').value = '';
-            document.getElementById('angle-select').value = '';
-            document.getElementById('angle-input').value = '';
-            document.getElementById('lighting-select').value = '';
-            document.getElementById('lighting-input').value = '';
-            document.getElementById('mood-select').value = '';
-            document.getElementById('mood-input').value = '';
-            document.getElementById('aspect-ratio-select').value = '';
-            document.getElementById('aspect-ratio-input').value = '';
-            document.getElementById('camera-movement-select').value = '';
-            document.getElementById('camera-movement-input').value = '';
-            document.getElementById('technical-modifiers-input').value = '';
+            // FIX: Get the button text by using the element's ID, which is now set in the HTML.
+            // The logic: replace 'message' in 'copy-message-synth' with 'button' to get 'copy-button-synth'.
+            const buttonId = msgId.replace('message', 'button'); 
+            const buttonTextFull = document.getElementById(buttonId).textContent;
             
-            document.getElementById('final-prompt-output').value = '';
+            // We just need the second word ("Base") for the message "Copied Base!"
+            const buttonText = buttonTextFull.split(' ')[1]; 
+            
+            try {
+                // Use modern Clipboard API
+                await navigator.clipboard.writeText(textToCopy);
+                
+                // Show confirmation
+                msgElement.textContent = `Copied ${buttonText}!`;
+                msgElement.classList.remove('opacity-0');
+                
+                // Hide confirmation after a delay
+                setTimeout(() => {
+                    msgElement.classList.add('opacity-0');
+                }, 1500);
 
-            // Hide Camera Movement field initially
-            document.getElementById('field-camera-movement').classList.add('hidden');
-            toggleRequiredStar('field-action', false);
-            toggleRequiredStar('field-camera-movement', false);
+            } catch (err) {
+                // Fallback for older browsers or restricted environments (like some iframes)
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.style.position = "fixed";
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.opacity = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    
+                    // Show fallback confirmation
+                    msgElement.textContent = `Copied ${buttonText} (Fallback)!`;
+                    msgElement.classList.remove('opacity-0');
+                    
+                    setTimeout(() => {
+                        msgElement.classList.add('opacity-0');
+                    }, 1500);
 
-
-            // Return to Step 1
-            document.getElementById('step3').classList.add('hidden');
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step1').classList.remove('hidden');
+                } catch (e) {
+                    console.error('Fallback copy failed:', e);
+                    msgElement.textContent = `Copy failed. Please copy manually.`;
+                    msgElement.classList.remove('opacity-0');
+                    setTimeout(() => {
+                        msgElement.classList.add('opacity-0');
+                    }, 3000);
+                }
+                document.body.removeChild(textArea);
+            }
         }
+
+        // Initialize default state
+        document.addEventListener('DOMContentLoaded', () => {
+            setGoal('Image'); // Default to Image mode on load
+        });
     </script>
 </body>
 </html>
