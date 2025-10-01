@@ -588,6 +588,8 @@
             }
 
             for (const field of requiredFields) {
+                // Check if the value is empty using the utility function getInputValue, which already
+                // prioritizes the custom field.
                 if (!params[field]) {
                     errorMessage.textContent = `Error: The '${field}' field is required for a ${outputGoal} prompt.`;
                     errorMessage.classList.remove('hidden');
